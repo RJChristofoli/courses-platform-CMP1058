@@ -1,0 +1,16 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: courses-platform-backend
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: courses-platform-frontend
+    depends_on:
+      - backend
+    ports:
+      - "4173:80"
