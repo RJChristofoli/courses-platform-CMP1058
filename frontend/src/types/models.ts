@@ -49,6 +49,13 @@ export interface Track {
   categoryId: number
 }
 
+export interface TrackCourse {
+  id: number
+  trackId: number
+  courseId: number
+  order: number
+}
+
 export interface Plan {
   id: number
   name: string
@@ -104,4 +111,35 @@ export interface DashboardData {
   subscriptions: Subscription[]
   payments: Payment[]
   certificates: Certificate[]
+}
+
+export interface AcademicCatalogData {
+  categories: Category[]
+  courses: Course[]
+  tracks: Track[]
+  trackCourses: TrackCourse[]
+  users: User[]
+}
+
+export interface CategoryPayload {
+  name: string
+  description: string
+}
+
+export interface CoursePayload {
+  title: string
+  description: string
+  instructorId: number
+  categoryId: number
+  level: string
+  publishedAt: string
+  totalLessons: number
+  totalHours: number
+}
+
+export interface TrackPayload {
+  title: string
+  description: string
+  categoryId: number
+  courseIds: number[]
 }
