@@ -1,0 +1,221 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "fullName": "Marina Lopes",
+      "email": "marina.lopes@cursoslab.dev",
+      "passwordHash": "hash_demo_001",
+      "createdAt": "2026-05-20T10:00:00.000Z",
+      "role": "student"
+    },
+    {
+      "id": 2,
+      "fullName": "Carlos Henrique",
+      "email": "carlos.henrique@cursoslab.dev",
+      "passwordHash": "hash_demo_002",
+      "createdAt": "2026-05-18T09:30:00.000Z",
+      "role": "instructor"
+    },
+    {
+      "id": 3,
+      "fullName": "Fernanda Souza",
+      "email": "fernanda.souza@cursoslab.dev",
+      "passwordHash": "hash_demo_003",
+      "createdAt": "2026-05-21T14:00:00.000Z",
+      "role": "instructor"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Desenvolvimento Web",
+      "description": "Cursos para construcao de interfaces, APIs e aplicacoes modernas."
+    },
+    {
+      "id": 2,
+      "name": "Dados e IA",
+      "description": "Formacoes em analise de dados, automacao e fundamentos de IA."
+    },
+    {
+      "id": 3,
+      "name": "Gestao de Produto",
+      "description": "Conteudos sobre descoberta, metricas e entrega continua."
+    }
+  ],
+  "courses": [
+    {
+      "id": 1,
+      "title": "React para Plataformas Escalaveis",
+      "description": "Criacao de frontends modulares com foco em experiencia e manutenibilidade.",
+      "instructorId": 2,
+      "categoryId": 1,
+      "level": "Intermediario",
+      "publishedAt": "2026-05-10T08:00:00.000Z",
+      "totalLessons": 12,
+      "totalHours": 8
+    },
+    {
+      "id": 2,
+      "title": "Fundamentos de Dados para Produtos Digitais",
+      "description": "Bases para coleta, leitura e decisao orientada por dados.",
+      "instructorId": 3,
+      "categoryId": 2,
+      "level": "Iniciante",
+      "publishedAt": "2026-05-16T08:00:00.000Z",
+      "totalLessons": 9,
+      "totalHours": 6
+    },
+    {
+      "id": 3,
+      "title": "Design de Trilhas de Aprendizagem",
+      "description": "Como organizar conteudo academico em jornadas claras e progressivas.",
+      "instructorId": 3,
+      "categoryId": 3,
+      "level": "Avancado",
+      "publishedAt": "2026-05-22T08:00:00.000Z",
+      "totalLessons": 7,
+      "totalHours": 5
+    }
+  ],
+  "modules": [
+    {
+      "id": 1,
+      "courseId": 1,
+      "title": "Fundacao do Projeto",
+      "order": 1
+    },
+    {
+      "id": 2,
+      "courseId": 1,
+      "title": "Arquitetura de Interface",
+      "order": 2
+    },
+    {
+      "id": 3,
+      "courseId": 2,
+      "title": "Leitura de Indicadores",
+      "order": 1
+    }
+  ],
+  "lessons": [
+    {
+      "id": 1,
+      "moduleId": 1,
+      "title": "Kickoff do workspace",
+      "contentType": "Video",
+      "contentUrl": "https://example.com/aula-1",
+      "durationMinutes": 25,
+      "order": 1
+    },
+    {
+      "id": 2,
+      "moduleId": 1,
+      "title": "Padroes de organizacao",
+      "contentType": "Texto",
+      "contentUrl": "https://example.com/aula-2",
+      "durationMinutes": 18,
+      "order": 2
+    },
+    {
+      "id": 3,
+      "moduleId": 2,
+      "title": "Layout com navegacao lateral",
+      "contentType": "Video",
+      "contentUrl": "https://example.com/aula-3",
+      "durationMinutes": 30,
+      "order": 1
+    }
+  ],
+  "tracks": [
+    {
+      "id": 1,
+      "title": "Frontend Profissional",
+      "description": "Sequencia focada em construcao de produtos de interface com boa usabilidade.",
+      "categoryId": 1
+    },
+    {
+      "id": 2,
+      "title": "Base Analitica",
+      "description": "Jornada de fundamentos para acompanhamento de desempenho academico.",
+      "categoryId": 2
+    }
+  ],
+  "trackCourses": [
+    {
+      "id": 1,
+      "trackId": 1,
+      "courseId": 1,
+      "order": 1
+    },
+    {
+      "id": 2,
+      "trackId": 2,
+      "courseId": 2,
+      "order": 1
+    }
+  ],
+  "plans": [
+    {
+      "id": 1,
+      "name": "Essencial",
+      "description": "Acesso a uma trilha por vez com progresso salvo.",
+      "price": 39.9,
+      "durationMonths": 1
+    },
+    {
+      "id": 2,
+      "name": "Academico Plus",
+      "description": "Acesso completo a cursos e certificados por semestre.",
+      "price": 199.9,
+      "durationMonths": 6
+    }
+  ],
+  "enrollments": [
+    {
+      "id": 1,
+      "userId": 1,
+      "courseId": 1,
+      "enrolledAt": "2026-05-25T09:00:00.000Z",
+      "completedAt": null
+    }
+  ],
+  "lessonProgress": [
+    {
+      "id": 1,
+      "userId": 1,
+      "lessonId": 1,
+      "completedAt": "2026-05-26T11:00:00.000Z",
+      "status": "Concluido"
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": 1,
+      "userId": 1,
+      "planId": 2,
+      "startDate": "2026-05-25T00:00:00.000Z",
+      "endDate": "2026-11-25T00:00:00.000Z",
+      "status": "active"
+    }
+  ],
+  "payments": [
+    {
+      "id": 1,
+      "subscriptionId": 1,
+      "amountPaid": 199.9,
+      "paymentDate": "2026-05-25T00:00:00.000Z",
+      "paymentMethod": "Cartao",
+      "gatewayTransactionId": "TRX-20260525-0001"
+    }
+  ],
+  "certificates": [
+    {
+      "id": 1,
+      "userId": 1,
+      "courseId": 1,
+      "trackId": null,
+      "verificationCode": "CERT-REACT-001",
+      "issuedAt": "2026-05-30T00:00:00.000Z"
+    }
+  ]
+}
