@@ -10,7 +10,7 @@ export const navigationItems = [
   {
     label: 'Catalogo',
     description: 'Cursos, categorias e trilhas',
-    href: '/catalogo',
+    href: '/catalogo/curso',
     icon: BookOpen,
   },
   {

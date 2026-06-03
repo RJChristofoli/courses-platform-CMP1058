@@ -8,9 +8,17 @@ const titles: Record<string, { title: string; subtitle: string }> = {
     title: 'Painel de controle',
     subtitle: 'Uma visao clara da operacao academica e financeira.',
   },
-  '/catalogo': {
-    title: 'Catalogo academico',
-    subtitle: 'Cursos, categorias e trilhas organizados para escalar o conteudo.',
+  '/catalogo/categoria': {
+    title: 'Catalogo de categorias',
+    subtitle: 'Gerencie os agrupadores do acervo academico com mais foco e clareza.',
+  },
+  '/catalogo/curso': {
+    title: 'Catalogo de cursos',
+    subtitle: 'Revise a vitrine academica com filtros e gestao dedicada por curso.',
+  },
+  '/catalogo/trilha': {
+    title: 'Catalogo de trilhas',
+    subtitle: 'Monte jornadas de aprendizagem sem misturar a navegacao com outras entidades.',
   },
   '/usuarios': {
     title: 'Usuarios e progresso',
