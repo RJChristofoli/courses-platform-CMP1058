@@ -44,13 +44,6 @@ export function AppSidebar() {
           )
         })}
       </nav>
-
-      <div className="mt-auto rounded-3xl bg-slate-900 p-6 text-slate-50 shadow-soft">
-        <p className="text-sm font-semibold">Etapa 1 entregue com base pronta</p>
-        <p className="mt-2 text-sm text-slate-300">
-          Frontend, backend, navegacao, dados iniciais e infraestrutura em compose.
-        </p>
-      </div>
     </aside>
   )
 }
