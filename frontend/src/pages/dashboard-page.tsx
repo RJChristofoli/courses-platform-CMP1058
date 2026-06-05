@@ -1,5 +1,4 @@
 import { CourseSpotlight } from '@/components/dashboard/course-spotlight'
-import { PlatformReadiness } from '@/components/dashboard/platform-readiness'
 import { StatsGrid } from '@/components/dashboard/stats-grid'
 import { EmptyState } from '@/components/ui/empty-state'
 import { useDashboardData } from '@/hooks/use-dashboard-data'
@@ -23,10 +22,7 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <StatsGrid data={data} />
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
-        <CourseSpotlight data={data} />
-        <PlatformReadiness />
-      </div>
+      <CourseSpotlight data={data} />
     </div>
   )
 }

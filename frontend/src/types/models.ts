@@ -94,7 +94,7 @@ export interface Certificate {
   id: number
   userId: number
   courseId: number
-  trackId: number | null
+  trackId?: number
   verificationCode: string
   issuedAt: string
 }
@@ -116,6 +116,8 @@ export interface DashboardData {
 export interface AcademicCatalogData {
   categories: Category[]
   courses: Course[]
+  modules: Module[]
+  lessons: Lesson[]
   tracks: Track[]
   trackCourses: TrackCourse[]
   users: User[]
@@ -135,6 +137,21 @@ export interface CoursePayload {
   publishedAt: string
   totalLessons: number
   totalHours: number
+}
+
+export interface ModulePayload {
+  courseId: number
+  title: string
+  order: number
+}
+
+export interface LessonPayload {
+  moduleId: number
+  title: string
+  contentType: string
+  contentUrl: string
+  durationMinutes: number
+  order: number
 }
 
 export interface TrackPayload {

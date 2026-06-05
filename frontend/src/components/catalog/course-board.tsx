@@ -2,20 +2,25 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 import type { AcademicCatalogData, Course } from '@/types/models'
 
 interface CourseBoardProps {
   data: AcademicCatalogData
   courses: Course[]
   selectedCategoryId: number | 'all'
-  onEdit: (course: Course) => void
-  onDelete: (course: Course) => void
+  selectedCourseId?: number | null
+  onSelect?: (course: Course) => void
+  onEdit?: (course: Course) => void
+  onDelete?: (course: Course) => void
 }
 
 export function CourseBoard({
   data,
   courses,
   selectedCategoryId,
+  selectedCourseId = null,
+  onSelect,
   onEdit,
   onDelete,
 }: CourseBoardProps) {
@@ -42,11 +47,22 @@ export function CourseBoard({
           const linkedTracks = data.trackCourses.filter(
             (relation) => relation.courseId === course.id,
           ).length
+          const modulesCount = data.modules.filter((module) => module.courseId === course.id).length
+          const lessonsCount = data.lessons.filter((lesson) =>
+            data.modules.some((module) => module.id === lesson.moduleId && module.courseId === course.id),
+          ).length
+
+          const Container = onSelect ? 'button' : 'div'
 
           return (
-            <div
+            <Container
               key={course.id}
-              className="rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5"
+              type={onSelect ? 'button' : undefined}
+              onClick={onSelect ? () => onSelect(course) : undefined}
+              className={cn(
+                'w-full rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 text-left transition hover:border-teal-200 hover:bg-white',
+                onSelect && selectedCourseId === course.id && 'border-teal-200 bg-white shadow-sm',
+              )}
             >
               <div className="flex items-start justify-between gap-6">
                 <div className="space-y-3">
@@ -58,25 +74,32 @@ export function CourseBoard({
                     <h3 className="text-xl font-semibold text-slate-900">{course.title}</h3>
                     <p className="mt-2 max-w-3xl text-sm">{course.description}</p>
                   </div>
-                  <div className="grid grid-cols-4 gap-4 text-sm text-slate-500">
+                  <div className="grid grid-cols-5 gap-4 text-sm text-slate-500">
                     <p>Instrutor: {instructor?.fullName ?? 'Nao encontrado'}</p>
-                    <p>{course.totalLessons} aulas</p>
+                    <p>{course.totalLessons} aulas previstas</p>
                     <p>{course.totalHours} horas</p>
-                    <p>{linkedTracks} trilha(s) relacionadas</p>
+                    <p>{linkedTracks} trilha(s)</p>
+                    <p>{modulesCount} modulo(s) / {lessonsCount} aula(s)</p>
                   </div>
                 </div>
-                <div className="flex shrink-0 gap-2">
-                  <Button variant="outline" onClick={() => onEdit(course)}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Editar
-                  </Button>
-                  <Button variant="ghost" onClick={() => onDelete(course)}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Remover
-                  </Button>
-                </div>
+                {onEdit || onDelete ? (
+                  <div className="flex shrink-0 gap-2" onClick={(event) => event.stopPropagation()}>
+                    {onEdit ? (
+                      <Button variant="outline" onClick={() => onEdit(course)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar
+                      </Button>
+                    ) : null}
+                    {onDelete ? (
+                      <Button variant="ghost" onClick={() => onDelete(course)}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Remover
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
-            </div>
+            </Container>
           )
         })}
         {courses.length === 0 ? (

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 export function AppLayout() {
   return (
     <div className="min-h-screen bg-hero">
-      <div className="mx-auto flex min-h-screen max-w-[1600px]">
+      <div className="flex min-h-screen w-full">
         <AppSidebar />
 
         <main className="flex-1 px-4 py-4 sm:px-6 lg:px-8">

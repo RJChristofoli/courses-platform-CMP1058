@@ -3,6 +3,7 @@ import { CatalogShell } from '@/components/catalog/catalog-shell'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CatalogCategoryPage } from '@/pages/catalog-category-page'
 import { CatalogCoursePage } from '@/pages/catalog-course-page'
+import { CatalogStructurePage } from '@/pages/catalog-structure-page'
 import { CatalogTrackPage } from '@/pages/catalog-track-page'
 import { DashboardPage } from '@/pages/dashboard-page'
 import { FinancePage } from '@/pages/finance-page'
@@ -16,9 +17,10 @@ function App() {
         <Route index element={<Navigate replace to="/dashboard" />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/catalogo" element={<CatalogShell />}>
-          <Route index element={<Navigate replace to="/catalogo/curso" />} />
+          <Route index element={<Navigate replace to="/catalogo/categoria" />} />
           <Route path="categoria" element={<CatalogCategoryPage />} />
           <Route path="curso" element={<CatalogCoursePage />} />
+          <Route path="estrutura" element={<CatalogStructurePage />} />
           <Route path="trilha" element={<CatalogTrackPage />} />
         </Route>
         <Route path="/usuarios" element={<UsersPage />} />

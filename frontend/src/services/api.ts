@@ -5,6 +5,10 @@ import type {
   Course,
   CoursePayload,
   DashboardData,
+  Lesson,
+  LessonPayload,
+  Module,
+  ModulePayload,
   Track,
   TrackCourse,
   TrackPayload,
@@ -76,9 +80,11 @@ export async function getDashboardData(): Promise<DashboardData> {
 }
 
 export async function getAcademicCatalogData(): Promise<AcademicCatalogData> {
-  const [categories, courses, tracks, trackCourses, users] = await Promise.all([
+  const [categories, courses, modules, lessons, tracks, trackCourses, users] = await Promise.all([
     request<Category[]>('categories'),
     request<Course[]>('courses'),
+    request<Module[]>('modules'),
+    request<Lesson[]>('lessons'),
     request<Track[]>('tracks'),
     request<TrackCourse[]>('trackCourses'),
     request<User[]>('users'),
@@ -87,6 +93,8 @@ export async function getAcademicCatalogData(): Promise<AcademicCatalogData> {
   return {
     categories,
     courses,
+    modules,
+    lessons,
     tracks,
     trackCourses,
     users,
@@ -129,6 +137,46 @@ export function updateCourse(courseId: number, payload: CoursePayload) {
 
 export function deleteCourse(courseId: number) {
   return request<void>(`courses/${courseId}`, {
+    method: 'DELETE',
+  })
+}
+
+export function createModule(payload: ModulePayload) {
+  return request<Module>('modules', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateModule(moduleId: number, payload: ModulePayload) {
+  return request<Module>(`modules/${moduleId}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteModule(moduleId: number) {
+  return request<void>(`modules/${moduleId}`, {
+    method: 'DELETE',
+  })
+}
+
+export function createLesson(payload: LessonPayload) {
+  return request<Lesson>('lessons', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function updateLesson(lessonId: number, payload: LessonPayload) {
+  return request<Lesson>(`lessons/${lessonId}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteLesson(lessonId: number) {
+  return request<void>(`lessons/${lessonId}`, {
     method: 'DELETE',
   })
 }
@@ -199,5 +247,30 @@ export async function removeCourseRelations(courseId: number) {
         method: 'DELETE',
       }),
     ),
+  )
+}
+
+export async function removeLessonsByModule(moduleId: number) {
+  const lessons = await request<Lesson[]>(`lessons?moduleId=${moduleId}`)
+
+  await Promise.all(
+    lessons.map((lesson) =>
+      request<void>(`lessons/${lesson.id}`, {
+        method: 'DELETE',
+      }),
+    ),
+  )
+}
+
+export async function removeModulesByCourse(courseId: number) {
+  const modules = await request<Module[]>(`modules?courseId=${courseId}`)
+
+  await Promise.all(
+    modules.map(async (module) => {
+      await removeLessonsByModule(module.id)
+      await request<void>(`modules/${module.id}`, {
+        method: 'DELETE',
+      })
+    }),
   )
 }
