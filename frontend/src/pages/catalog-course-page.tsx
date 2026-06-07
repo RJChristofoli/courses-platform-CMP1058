@@ -34,18 +34,18 @@ export function CatalogCoursePage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Input className="h-10 w-72" placeholder="Buscar curso" value={search} onChange={(e) => setSearch(e.target.value)} />
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
+          <Input className="h-10 w-full lg:w-72" placeholder="Buscar curso" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}>
             <option value="all">Todas as categorias</option>
             {catalog.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
           </select>
           <select className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm" value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)}>
-            <option value="all">Todos os niveis</option>
+            <option value="all">Todos os níveis</option>
             <option value="Iniciante">Iniciante</option>
-            <option value="Intermediario">Intermediario</option>
-            <option value="Avancado">Avancado</option>
+            <option value="Intermediario">Intermediário</option>
+            <option value="Avancado">Avançado</option>
           </select>
         </div>
         <Button onClick={() => { setEditingCourse(null); setCourseDialogOpen(true) }}>

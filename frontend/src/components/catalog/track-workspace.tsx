@@ -29,18 +29,28 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
   const selectedTrack = data.tracks.find((track) => track.id === selectedTrackId) ?? null
 
   useEffect(() => {
-    if (tracks.length === 0) {
+    if (tracks.length === 0 && selectedTrackId !== null) {
       setSelectedTrackId(null)
       return
     }
-    setSelectedTrackId((current) => (current && tracks.some((track) => track.id === current) ? current : tracks[0].id))
-  }, [tracks])
+
+    setSelectedTrackId((current) => {
+      if (current === null) return current
+      if (tracks.some((track) => track.id === current)) return current
+      return tracks[0]?.id ?? null
+    })
+  }, [selectedTrackId, tracks])
 
   useEffect(() => {
+    if (selectedTrackId === null) {
+      return
+    }
+
     if (!selectedTrack) {
       setTrackForm(null)
       return
     }
+
     const courseIds = data.trackCourses
       .filter((relation) => relation.trackId === selectedTrack.id)
       .sort((left, right) => left.order - right.order)
@@ -52,7 +62,9 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
       categoryId: selectedTrack.categoryId,
       courseIds,
     })
-  }, [data.trackCourses, selectedTrack])
+    setShowQuickAdd(courseIds.length === 0)
+    setCourseSearch('')
+  }, [data.trackCourses, selectedTrack, selectedTrackId])
 
   const availableCourses = useMemo(() => {
     if (!trackForm) return []
@@ -68,9 +80,11 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
     if (!trackForm) return
     if (selectedTrack) {
       await onUpdateTrack(selectedTrack.id, trackForm)
-    } else {
-      await onCreateTrack(trackForm)
+      return
     }
+
+    await onCreateTrack(trackForm)
+    setSelectedTrackId(null)
   }
 
   function reorderCourses(targetCourseId: number) {
@@ -85,15 +99,24 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
     setDragCourseId(null)
   }
 
+  function addCourse(courseId: number) {
+    if (!trackForm) return
+    setTrackForm({ ...trackForm, courseIds: [...trackForm.courseIds, courseId] })
+    setCourseSearch('')
+    setShowQuickAdd(false)
+  }
+
   return (
-    <div className="grid min-h-[720px] grid-cols-[28%_72%] gap-4 xl:min-h-[760px]">
-      <section className="flex min-h-0 flex-col rounded-xl border border-slate-200 bg-white">
+    <div className="grid min-h-[720px] grid-cols-1 gap-4 2xl:grid-cols-[28%_72%] xl:min-h-[760px]">
+      <section className="flex min-h-0 min-w-0 flex-col rounded-xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <p className="text-sm font-semibold text-slate-900">Trilhas</p>
           <Button
             size="sm"
             onClick={() => {
               setSelectedTrackId(null)
+              setCourseSearch('')
+              setShowQuickAdd(true)
               setTrackForm({
                 title: 'Nova trilha',
                 description: '',
@@ -121,38 +144,49 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
           {tracks.map((track) => {
             const count = data.trackCourses.filter((relation) => relation.trackId === track.id).length
             return (
-              <button
+              <div
                 key={track.id}
-                type="button"
                 className={cn(
-                  'flex w-full items-center justify-between border-b border-slate-100 px-4 py-3 text-left hover:bg-slate-50',
+                  'flex items-center justify-between border-b border-slate-100 px-4 py-3',
                   selectedTrackId === track.id && 'bg-slate-100',
                 )}
-                onClick={() => setSelectedTrackId(track.id)}
               >
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{track.title}</p>
+                <button
+                  type="button"
+                  className="min-w-0 flex-1 text-left"
+                  onClick={() => {
+                    setSelectedTrackId(track.id)
+                    setCourseSearch('')
+                  }}
+                >
+                  <p className="truncate text-sm font-medium text-slate-900">{track.title}</p>
                   <p className="mt-1 text-xs text-slate-500">{count} curso(s)</p>
-                </div>
+                </button>
                 <ActionMenu
                   items={[
-                    { label: 'Editar', onSelect: () => setSelectedTrackId(track.id) },
+                    {
+                      label: 'Editar',
+                      onSelect: () => {
+                        setSelectedTrackId(track.id)
+                        setCourseSearch('')
+                      },
+                    },
                     { label: 'Remover', tone: 'danger', onSelect: () => onDeleteTrack(track) },
                   ]}
                 />
-              </button>
+              </div>
             )
           })}
         </div>
       </section>
 
-      <section className="grid min-h-0 grid-cols-[58%_42%] gap-4">
-        <div className="flex min-h-0 flex-col rounded-xl border border-slate-200 bg-white">
+      <section className="grid min-h-0 grid-cols-1 gap-4 xl:grid-cols-[60%_40%]">
+        <div className="flex min-h-0 min-w-0 flex-col rounded-xl border border-slate-200 bg-white">
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
             <div>
               <p className="text-sm font-semibold text-slate-900">Fluxo da trilha</p>
               <p className="mt-1 text-xs text-slate-500">
-                {trackForm ? 'Reordene os cursos para definir a progressao da aprendizagem.' : 'Selecione uma trilha.'}
+                {trackForm ? 'Monte e reordene a sequência dos cursos por aqui.' : 'Selecione uma trilha.'}
               </p>
             </div>
             {trackForm ? (
@@ -165,13 +199,59 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
               </button>
             ) : null}
           </div>
-          <div className="min-h-0 flex-1 overflow-auto px-4 py-4">
+          <div className="min-h-0 flex-1 overflow-auto px-4 py-3">
             {!trackForm ? <p className="text-sm text-slate-500">Selecione uma trilha.</p> : null}
+
+            {trackForm && showQuickAdd ? (
+              <div className="mb-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Adicionar curso na sequência</p>
+                    <p className="mt-1 text-xs text-slate-500">Escolha um curso da mesma categoria da trilha.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-slate-500 hover:text-slate-900"
+                    onClick={() => setShowQuickAdd(false)}
+                  >
+                    Fechar
+                  </button>
+                </div>
+                <Input
+                  className="mt-3 h-9"
+                  placeholder="Buscar curso para adicionar"
+                  value={courseSearch}
+                  onChange={(e) => setCourseSearch(e.target.value)}
+                />
+                <div className="mt-3 space-y-2">
+                  {availableCourses.slice(0, 6).map((course) => {
+                    const category = data.categories.find((category) => category.id === course.categoryId)?.name ?? 'Sem categoria'
+                    return (
+                      <button
+                        key={course.id}
+                        type="button"
+                        className="flex w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-sm hover:bg-slate-50"
+                        onClick={() => addCourse(course.id)}
+                      >
+                        <span>
+                          <span className="font-medium text-slate-900">{course.title}</span>
+                          <span className="ml-2 text-slate-500">{category} · {course.level}</span>
+                        </span>
+                        <Plus className="h-4 w-4 text-slate-400" />
+                      </button>
+                    )
+                  })}
+                  {availableCourses.length === 0 ? (
+                    <p className="text-sm text-slate-500">Nenhum curso disponível para esta categoria.</p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
             {trackForm && trackForm.courseIds.length === 0 ? (
               <EmptyState
-                title="Nenhum curso adicionado a trilha"
-                description="Busque um curso no painel lateral para comecar."
+                title="Nenhum curso adicionado à trilha"
+                description="Adicione cursos no fluxo da trilha para montar a jornada de aprendizagem."
                 action={
                   <button
                     type="button"
@@ -184,87 +264,52 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
               />
             ) : null}
 
-            {showQuickAdd && trackForm ? (
-              <div className="mb-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-medium text-slate-900">Adicionar curso na sequencia</p>
-                  <button
-                    type="button"
-                    className="text-xs font-medium text-slate-500 hover:text-slate-900"
-                    onClick={() => setShowQuickAdd(false)}
+            <div className="space-y-2">
+              {trackForm?.courseIds.map((courseId, index) => {
+                const course = data.courses.find((item) => item.id === courseId)
+                const category = data.categories.find((item) => item.id === course?.categoryId)?.name ?? 'Sem categoria'
+
+                return (
+                  <div
+                    key={courseId}
+                    className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5"
+                    draggable
+                    onDragStart={() => setDragCourseId(courseId)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={() => reorderCourses(courseId)}
                   >
-                    Fechar
-                  </button>
-                </div>
-                <div className="mt-3 space-y-2">
-                  {availableCourses.slice(0, 5).map((course) => {
-                    const category = data.categories.find((category) => category.id === course.categoryId)?.name ?? 'Sem categoria'
-                    return (
-                      <button
-                        key={course.id}
-                        type="button"
-                        className="flex w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-sm hover:bg-slate-50"
-                        onClick={() => setTrackForm({ ...trackForm, courseIds: [...trackForm.courseIds, course.id] })}
-                      >
-                        <span>
-                          <span className="font-medium text-slate-900">{course.title}</span>
-                          <span className="ml-2 text-slate-500">{category} · {course.level}</span>
-                        </span>
-                        <Plus className="h-4 w-4 text-slate-400" />
-                      </button>
-                    )
-                  })}
-                  {availableCourses.length === 0 ? (
-                    <p className="text-sm text-slate-500">Nenhum curso disponivel para esta categoria.</p>
-                  ) : null}
-                </div>
-              </div>
-            ) : null}
-
-            {trackForm?.courseIds.map((courseId, index) => {
-              const course = data.courses.find((item) => item.id === courseId)
-              const category = data.categories.find((item) => item.id === course?.categoryId)?.name ?? 'Sem categoria'
-
-              return (
-                <div
-                  key={courseId}
-                  className="mb-3 flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3"
-                  draggable
-                  onDragStart={() => setDragCourseId(courseId)}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={() => reorderCourses(courseId)}
-                >
-                  <GripVertical className="mt-1 h-4 w-4 text-slate-400" />
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900">{course?.title ?? 'Curso nao encontrado'}</p>
-                    <p className="mt-1 text-xs text-slate-500">{category} · {course?.level ?? 'Nivel indefinido'}</p>
-                  </div>
-                  <ActionMenu
-                    items={[
-                      {
-                        label: 'Remover da trilha',
-                        tone: 'danger',
-                        onSelect: () => {
-                          if (!trackForm) return
-                          setTrackForm({
-                            ...trackForm,
-                            courseIds: trackForm.courseIds.filter((id) => id !== courseId),
-                          })
+                    <GripVertical className="mt-1 h-4 w-4 text-slate-400" />
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                      {index + 1}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-slate-900">{course?.title ?? 'Curso não encontrado'}</p>
+                      <p className="mt-1 text-xs text-slate-500">{category} · {course?.level ?? 'Nível indefinido'}</p>
+                    </div>
+                    <ActionMenu
+                      items={[
+                        {
+                          label: 'Remover da trilha',
+                          tone: 'danger',
+                          onSelect: () => {
+                            if (!trackForm) return
+                            setTrackForm({
+                              ...trackForm,
+                              courseIds: trackForm.courseIds.filter((id) => id !== courseId),
+                            })
+                          },
                         },
-                      },
-                    ]}
-                  />
-                </div>
-              )
-            })}
+                      ]}
+                    />
+                  </div>
+                )
+              })}
+            </div>
 
             {trackForm && trackForm.courseIds.length > 0 ? (
               <button
                 type="button"
-                className="mt-1 text-sm font-medium text-slate-600 hover:text-slate-950"
+                className="mt-3 text-sm font-medium text-slate-600 hover:text-slate-950"
                 onClick={() => setShowQuickAdd(true)}
               >
                 + Adicionar curso
@@ -273,15 +318,15 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-col rounded-xl border border-slate-200 bg-white">
+        <div className="flex min-h-0 min-w-0 flex-col rounded-xl border border-slate-200 bg-white">
           <div className="border-b border-slate-200 px-4 py-3">
             <p className="text-sm font-semibold text-slate-900">Propriedades</p>
           </div>
-          <div className="min-h-0 flex-1 overflow-auto p-4">
+          <div className="min-h-0 flex-1 overflow-auto overflow-x-hidden p-4">
             {trackForm ? (
               <div className="space-y-4">
                 <label className="block space-y-1.5 text-sm text-slate-700">
-                  <span className="font-medium">Titulo</span>
+                  <span className="font-medium">Título</span>
                   <Input value={trackForm.title} onChange={(e) => setTrackForm({ ...trackForm, title: e.target.value })} />
                 </label>
                 <label className="block space-y-1.5 text-sm text-slate-700">
@@ -289,7 +334,11 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
                   <select
                     className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
                     value={trackForm.categoryId}
-                    onChange={(e) => setTrackForm({ ...trackForm, categoryId: Number(e.target.value), courseIds: [] })}
+                    onChange={(e) => {
+                      setTrackForm({ ...trackForm, categoryId: Number(e.target.value), courseIds: [] })
+                      setCourseSearch('')
+                      setShowQuickAdd(true)
+                    }}
                   >
                     {data.categories.map((category) => (
                       <option key={category.id} value={category.id}>
@@ -299,43 +348,17 @@ export function TrackWorkspace({ data, onCreateTrack, onUpdateTrack, onDeleteTra
                   </select>
                 </label>
                 <label className="block space-y-1.5 text-sm text-slate-700">
-                  <span className="font-medium">Descricao</span>
+                  <span className="font-medium">Descrição</span>
                   <textarea
                     className="min-h-28 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                     value={trackForm.description}
                     onChange={(e) => setTrackForm({ ...trackForm, description: e.target.value })}
                   />
                 </label>
-                <div className="space-y-2 rounded-lg border border-slate-200 p-3">
-                  <p className="text-sm font-medium text-slate-900">Adicionar curso</p>
-                  <Input
-                    className="h-9"
-                    placeholder="Buscar curso"
-                    value={courseSearch}
-                    onChange={(e) => setCourseSearch(e.target.value)}
-                  />
-                  <div className="max-h-60 overflow-auto">
-                    {availableCourses.map((course) => {
-                      const category = data.categories.find((item) => item.id === course.categoryId)?.name ?? 'Sem categoria'
-                      return (
-                        <button
-                          key={course.id}
-                          type="button"
-                          className="flex w-full items-center justify-between border-b border-slate-100 px-2 py-2 text-left text-sm hover:bg-slate-50"
-                          onClick={() => setTrackForm({ ...trackForm, courseIds: [...trackForm.courseIds, course.id] })}
-                        >
-                          <span>
-                            <span className="font-medium text-slate-900">{course.title}</span>
-                            <span className="ml-2 text-slate-500">{category} · {course.level}</span>
-                          </span>
-                          <Plus className="h-4 w-4 text-slate-400" />
-                        </button>
-                      )
-                    })}
-                    {availableCourses.length === 0 ? (
-                      <p className="px-2 py-2 text-sm text-slate-500">Nenhum curso disponivel para adicionar.</p>
-                    ) : null}
-                  </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-600">
+                  <p className="font-medium text-slate-900">Resumo da trilha</p>
+                  <p className="mt-2">{trackForm.courseIds.length} curso(s) na sequência atual.</p>
+                  <p className="mt-1">Use o painel central para adicionar, remover e reordenar cursos.</p>
                 </div>
               </div>
             ) : (

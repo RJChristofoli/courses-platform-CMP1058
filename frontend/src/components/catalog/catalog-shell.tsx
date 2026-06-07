@@ -16,14 +16,14 @@ export function CatalogShell() {
   const navigate = useNavigate()
 
   if (catalog.isLoading) {
-    return <div className="text-sm text-slate-500">Carregando catalogo academico...</div>
+    return <div className="text-sm text-slate-500">Carregando catálogo acadêmico...</div>
   }
 
   if (catalog.error || !catalog.data) {
     return (
       <EmptyState
-        title="Catalogo indisponivel"
-        description={catalog.error ?? 'Nao foi possivel carregar o modulo de catalogo.'}
+        title="Catálogo indisponível"
+        description={catalog.error ?? 'Não foi possível carregar o módulo de catálogo.'}
       />
     )
   }

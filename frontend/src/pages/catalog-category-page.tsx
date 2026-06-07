@@ -35,7 +35,7 @@ export function CatalogCategoryPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <Input className="h-10 max-w-sm" placeholder="Buscar categoria" value={search} onChange={(e) => setSearch(e.target.value)} />
         <Button onClick={() => { setEditingCategory(null); setDialogOpen(true) }}>
           <Plus className="mr-2 h-4 w-4" />

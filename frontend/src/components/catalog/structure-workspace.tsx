@@ -141,6 +141,20 @@ export function StructureWorkspace({
   useEffect(() => {
     if (!selection) return
 
+    if (selection.kind === 'module' && !data.modules.some((item) => item.id === selection.id)) {
+      setSelection(selectedCourse ? { kind: 'course', id: selectedCourse.id } : null)
+      return
+    }
+
+    if (selection.kind === 'lesson' && !data.lessons.some((item) => item.id === selection.id)) {
+      setSelection(selectedCourse ? { kind: 'course', id: selectedCourse.id } : null)
+      return
+    }
+  }, [data.lessons, data.modules, selectedCourse, selection])
+
+  useEffect(() => {
+    if (!selection) return
+
     if (selection.kind === 'course') {
       const course = data.courses.find((item) => item.id === selection.id)
       if (!course) return
@@ -186,7 +200,7 @@ export function StructureWorkspace({
 
     if (selection.kind === 'new-module') {
       const nextOrder = data.modules.filter((module) => module.courseId === selection.courseId).length + 1
-      setModuleForm({ courseId: selection.courseId, title: 'Novo modulo', order: nextOrder })
+      setModuleForm({ courseId: selection.courseId, title: 'Novo módulo', order: nextOrder })
       setCourseForm(null)
       setLessonForm(null)
       return
@@ -197,7 +211,7 @@ export function StructureWorkspace({
       setLessonForm({
         moduleId: selection.moduleId,
         title: 'Nova aula',
-        contentType: 'Video',
+        contentType: 'Vídeo',
         contentUrl: 'https://',
         durationMinutes: 10,
         order: nextOrder,
@@ -304,16 +318,11 @@ export function StructureWorkspace({
   }
 
   return (
-    <div className="grid min-h-[720px] grid-cols-[25%_35%_40%] gap-4 xl:min-h-[760px]">
-      <section className="flex min-h-0 flex-col rounded-xl border border-slate-200 bg-white">
+    <div className="grid min-h-[720px] grid-cols-1 gap-4 xl:grid-cols-[28%_72%] 2xl:grid-cols-[25%_35%_40%] xl:min-h-[760px]">
+      <section className="flex min-h-0 min-w-0 flex-col rounded-xl border border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-4 py-3">
           <p className="text-sm font-semibold text-slate-900">Cursos</p>
-          <Input
-            className="mt-3 h-9"
-            placeholder="Buscar curso"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+          <Input className="mt-3 h-9" placeholder="Buscar curso" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
           {filteredCourses.length === 0 ? (
@@ -346,7 +355,7 @@ export function StructureWorkspace({
                 <div>
                   <p className="text-sm font-medium text-slate-900">{course.title}</p>
                   <p className="mt-1 text-xs text-slate-500">
-                    {modulesCount} modulos · {lessonsCount} aulas
+                    {modulesCount} módulos · {lessonsCount} aulas
                   </p>
                 </div>
               </button>
@@ -355,12 +364,12 @@ export function StructureWorkspace({
         </div>
       </section>
 
-      <section className="flex min-h-0 flex-col rounded-xl border border-slate-200 bg-white">
+      <section className="flex min-h-0 min-w-0 flex-col rounded-xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <div>
             <p className="text-sm font-semibold text-slate-900">Estrutura</p>
             <p className="mt-1 text-xs text-slate-500">
-              {selectedCourse ? selectedCourse.title : 'Selecione um curso para editar modulos e aulas.'}
+              {selectedCourse ? selectedCourse.title : 'Selecione um curso para editar módulos e aulas.'}
             </p>
           </div>
           <Button
@@ -372,7 +381,7 @@ export function StructureWorkspace({
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Modulo
+            Módulo
           </Button>
         </div>
         <div className="min-h-0 flex-1 overflow-auto p-2">
@@ -380,19 +389,19 @@ export function StructureWorkspace({
             <EmptyState
               className="m-2"
               title="Nenhum curso selecionado"
-              description="Escolha um curso na coluna lateral para visualizar a arvore de modulos e aulas."
+              description="Escolha um curso na coluna lateral para visualizar a árvore de módulos e aulas."
             />
           ) : null}
 
           {selectedCourse && selectedModules.length === 0 ? (
             <EmptyState
               className="m-2"
-              title="Curso sem modulos"
-              description="Crie o primeiro modulo para iniciar a estrutura do curso."
+              title="Curso sem módulos"
+              description="Crie o primeiro módulo para iniciar a estrutura do curso."
               action={
                 <Button size="sm" onClick={() => setSelection({ kind: 'new-module', courseId: selectedCourse.id })}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Adicionar modulo
+                  Adicionar módulo
                 </Button>
               }
             />
@@ -413,10 +422,7 @@ export function StructureWorkspace({
             return (
               <div key={module.id} className="mb-2 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
                 <div
-                  className={cn(
-                    'flex items-center gap-2 px-3 py-2',
-                    selectedInModule && 'bg-slate-100',
-                  )}
+                  className={cn('flex items-center gap-2 px-3 py-2', selectedInModule && 'bg-slate-100')}
                   draggable
                   onDragStart={() => setDragState({ type: 'module', id: module.id })}
                   onDragOver={(event) => event.preventDefault()}
@@ -426,11 +432,7 @@ export function StructureWorkspace({
                   }}
                 >
                   <GripVertical className="h-4 w-4 text-slate-400" />
-                  <button
-                    type="button"
-                    className="flex items-center text-slate-500"
-                    onClick={() => toggleModule(module.id)}
-                  >
+                  <button type="button" className="flex items-center text-slate-500" onClick={() => toggleModule(module.id)}>
                     {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                   </button>
                   <button
@@ -439,9 +441,7 @@ export function StructureWorkspace({
                     onClick={() => setSelection({ kind: 'module', id: module.id })}
                   >
                     <p className="text-sm font-medium text-slate-900">{module.title}</p>
-                    <p className="text-xs text-slate-500">
-                      {lessons.length} {lessons.length === 1 ? 'aula' : 'aulas'}
-                    </p>
+                    <p className="text-xs text-slate-500">{lessons.length} {lessons.length === 1 ? 'aula' : 'aulas'}</p>
                   </button>
                   <ActionMenu
                     items={[
@@ -456,7 +456,7 @@ export function StructureWorkspace({
                   <div className="border-t border-slate-200 bg-white">
                     {lessons.length === 0 ? (
                       <div className="ml-6 border-l border-dashed border-slate-200 px-4 py-4">
-                        <p className="text-sm text-slate-500">Nenhuma aula cadastrada neste modulo.</p>
+                        <p className="text-sm text-slate-500">Nenhuma aula cadastrada neste módulo.</p>
                         <button
                           type="button"
                           className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-950"
@@ -491,11 +491,7 @@ export function StructureWorkspace({
                           }}
                         >
                           <GripVertical className="h-4 w-4 text-slate-300" />
-                          <button
-                            type="button"
-                            className="flex-1 text-left"
-                            onClick={() => setSelection({ kind: 'lesson', id: lesson.id })}
-                          >
+                          <button type="button" className="flex-1 text-left" onClick={() => setSelection({ kind: 'lesson', id: lesson.id })}>
                             <p className="text-sm text-slate-700">{lesson.title}</p>
                             <p className="text-xs text-slate-400">{lesson.contentType}</p>
                           </button>
@@ -532,128 +528,48 @@ export function StructureWorkspace({
         </div>
       </section>
 
-      <section className="flex min-h-0 flex-col rounded-xl border border-slate-200 bg-white">
+      <section className="flex min-h-0 min-w-0 flex-col rounded-xl border border-slate-200 bg-white xl:col-span-2 2xl:col-span-1">
         <div className="border-b border-slate-200 px-4 py-3">
           <p className="text-sm font-semibold text-slate-900">Propriedades</p>
         </div>
-        <div className="min-h-0 flex-1 overflow-auto p-4">
+        <div className="min-h-0 flex-1 overflow-auto overflow-x-hidden p-4">
           {!selection ? <p className="text-sm text-slate-500">Selecione um item para editar.</p> : null}
 
           {selection?.kind === 'course' && courseForm ? (
             <div className="space-y-4">
-              <Field label="Titulo">
-                <Input value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} />
-              </Field>
-              <Field label="Descricao">
-                <textarea
-                  className="min-h-28 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-                  value={courseForm.description}
-                  onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
-                />
-              </Field>
+              <Field label="Título"><Input value={courseForm.title} onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })} /></Field>
+              <Field label="Descrição"><textarea className="min-h-28 w-full rounded-md border border-slate-200 px-3 py-2 text-sm" value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })} /></Field>
               <TwoCols>
-                <SelectField
-                  label="Categoria"
-                  value={courseForm.categoryId}
-                  options={data.categories.map((c) => ({ value: c.id, label: c.name }))}
-                  onChange={(value) => setCourseForm({ ...courseForm, categoryId: Number(value) })}
-                />
-                <SelectField
-                  label="Instrutor"
-                  value={courseForm.instructorId}
-                  options={data.users
-                    .filter((u) => u.role === 'instructor')
-                    .map((u) => ({ value: u.id, label: u.fullName }))}
-                  onChange={(value) => setCourseForm({ ...courseForm, instructorId: Number(value) })}
-                />
+                <SelectField label="Categoria" value={courseForm.categoryId} options={data.categories.map((c) => ({ value: c.id, label: c.name }))} onChange={(value) => setCourseForm({ ...courseForm, categoryId: Number(value) })} />
+                <SelectField label="Instrutor" value={courseForm.instructorId} options={data.users.filter((u) => u.role === 'instructor').map((u) => ({ value: u.id, label: u.fullName }))} onChange={(value) => setCourseForm({ ...courseForm, instructorId: Number(value) })} />
               </TwoCols>
               <TwoCols>
-                <SelectField
-                  label="Nivel"
-                  value={courseForm.level}
-                  options={[
-                    { value: 'Iniciante', label: 'Iniciante' },
-                    { value: 'Intermediario', label: 'Intermediario' },
-                    { value: 'Avancado', label: 'Avancado' },
-                  ]}
-                  onChange={(value) => setCourseForm({ ...courseForm, level: value })}
-                />
-                <Field label="Publicacao">
-                  <Input
-                    type="date"
-                    value={courseForm.publishedAt.slice(0, 10)}
-                    onChange={(e) => setCourseForm({ ...courseForm, publishedAt: new Date(e.target.value).toISOString() })}
-                  />
-                </Field>
+                <SelectField label="Nível" value={courseForm.level} options={[{ value: 'Iniciante', label: 'Iniciante' }, { value: 'Intermediario', label: 'Intermediário' }, { value: 'Avancado', label: 'Avançado' }]} onChange={(value) => setCourseForm({ ...courseForm, level: value })} />
+                <Field label="Publicação"><Input type="date" value={courseForm.publishedAt.slice(0, 10)} onChange={(e) => setCourseForm({ ...courseForm, publishedAt: new Date(e.target.value).toISOString() })} /></Field>
               </TwoCols>
               <TwoCols>
-                <Field label="Total de aulas">
-                  <Input
-                    type="number"
-                    value={courseForm.totalLessons}
-                    onChange={(e) => setCourseForm({ ...courseForm, totalLessons: Number(e.target.value) })}
-                  />
-                </Field>
-                <Field label="Total de horas">
-                  <Input
-                    type="number"
-                    value={courseForm.totalHours}
-                    onChange={(e) => setCourseForm({ ...courseForm, totalHours: Number(e.target.value) })}
-                  />
-                </Field>
+                <Field label="Total de aulas"><Input type="number" value={courseForm.totalLessons} onChange={(e) => setCourseForm({ ...courseForm, totalLessons: Number(e.target.value) })} /></Field>
+                <Field label="Total de horas"><Input type="number" value={courseForm.totalHours} onChange={(e) => setCourseForm({ ...courseForm, totalHours: Number(e.target.value) })} /></Field>
               </TwoCols>
             </div>
           ) : null}
 
           {(selection?.kind === 'module' || selection?.kind === 'new-module') && moduleForm ? (
             <div className="space-y-4">
-              <Field label="Titulo">
-                <Input value={moduleForm.title} onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })} />
-              </Field>
-              <Field label="Ordem">
-                <Input
-                  type="number"
-                  value={moduleForm.order}
-                  onChange={(e) => setModuleForm({ ...moduleForm, order: Number(e.target.value) })}
-                />
-              </Field>
+              <Field label="Título"><Input value={moduleForm.title} onChange={(e) => setModuleForm({ ...moduleForm, title: e.target.value })} /></Field>
+              <Field label="Ordem"><Input type="number" value={moduleForm.order} onChange={(e) => setModuleForm({ ...moduleForm, order: Number(e.target.value) })} /></Field>
             </div>
           ) : null}
 
           {(selection?.kind === 'lesson' || selection?.kind === 'new-lesson') && lessonForm ? (
             <div className="space-y-4">
-              <Field label="Titulo">
-                <Input value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} />
-              </Field>
+              <Field label="Título"><Input value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} /></Field>
               <TwoCols>
-                <SelectField
-                  label="Tipo"
-                  value={lessonForm.contentType}
-                  options={[
-                    { value: 'Video', label: 'Video' },
-                    { value: 'Texto', label: 'Texto' },
-                    { value: 'Quiz', label: 'Quiz' },
-                  ]}
-                  onChange={(value) => setLessonForm({ ...lessonForm, contentType: value })}
-                />
-                <Field label="Duracao">
-                  <Input
-                    type="number"
-                    value={lessonForm.durationMinutes}
-                    onChange={(e) => setLessonForm({ ...lessonForm, durationMinutes: Number(e.target.value) })}
-                  />
-                </Field>
+                <SelectField label="Tipo" value={lessonForm.contentType} options={[{ value: 'Vídeo', label: 'Vídeo' }, { value: 'Texto', label: 'Texto' }, { value: 'Quiz', label: 'Quiz' }, { value: 'Video', label: 'Vídeo' }]} onChange={(value) => setLessonForm({ ...lessonForm, contentType: value })} />
+                <Field label="Duração"><Input type="number" value={lessonForm.durationMinutes} onChange={(e) => setLessonForm({ ...lessonForm, durationMinutes: Number(e.target.value) })} /></Field>
               </TwoCols>
-              <Field label="URL">
-                <Input value={lessonForm.contentUrl} onChange={(e) => setLessonForm({ ...lessonForm, contentUrl: e.target.value })} />
-              </Field>
-              <Field label="Ordem">
-                <Input
-                  type="number"
-                  value={lessonForm.order}
-                  onChange={(e) => setLessonForm({ ...lessonForm, order: Number(e.target.value) })}
-                />
-              </Field>
+              <Field label="URL"><Input value={lessonForm.contentUrl} onChange={(e) => setLessonForm({ ...lessonForm, contentUrl: e.target.value })} /></Field>
+              <Field label="Ordem"><Input type="number" value={lessonForm.order} onChange={(e) => setLessonForm({ ...lessonForm, order: Number(e.target.value) })} /></Field>
             </div>
           ) : null}
         </div>
@@ -689,11 +605,7 @@ function SelectField({
 }) {
   return (
     <Field label={label}>
-      <select
-        className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      >
+      <select className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm" value={value} onChange={(event) => onChange(event.target.value)}>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -705,5 +617,5 @@ function SelectField({
 }
 
 function TwoCols({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-2 gap-3">{children}</div>
+  return <div className="grid grid-cols-1 gap-3 md:grid-cols-2">{children}</div>
 }

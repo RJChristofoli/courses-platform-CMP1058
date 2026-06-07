@@ -12,11 +12,11 @@ interface CourseTableProps {
 export function CourseTable({ data, courses, onEdit, onDelete, onOpenStructure }: CourseTableProps) {
   return (
     <DataTable
-      columns={['Nome', 'Categoria', 'Nivel', 'Instrutor', 'Modulos', 'Aulas', 'Trilhas', 'Ações']}
+      columns={['Nome', 'Categoria', 'Nível', 'Instrutor', 'Módulos', 'Aulas', 'Trilhas', 'Ações']}
     >
       {courses.map((course) => {
         const category = data.categories.find((item) => item.id === course.categoryId)?.name ?? 'Sem categoria'
-        const instructor = data.users.find((item) => item.id === course.instructorId)?.fullName ?? 'Nao encontrado'
+        const instructor = data.users.find((item) => item.id === course.instructorId)?.fullName ?? 'Não encontrado'
         const modules = data.modules.filter((module) => module.courseId === course.id)
         const lessons = data.lessons.filter((lesson) => modules.some((module) => module.id === lesson.moduleId))
         const tracks = data.trackCourses.filter((relation) => relation.courseId === course.id).length

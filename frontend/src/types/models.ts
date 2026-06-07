@@ -72,13 +72,21 @@ export interface Enrollment {
   completedAt: string | null
 }
 
+export interface LessonProgress {
+  id: number
+  userId: number
+  lessonId: number
+  completedAt: string | null
+  status: 'Concluido' | 'Em andamento'
+}
+
 export interface Subscription {
   id: number
   userId: number
   planId: number
   startDate: string
   endDate: string
-  status: string
+  status: 'active' | 'paused' | 'cancelled' | 'expired'
 }
 
 export interface Payment {
@@ -106,8 +114,10 @@ export interface DashboardData {
   modules: Module[]
   lessons: Lesson[]
   tracks: Track[]
+  trackCourses: TrackCourse[]
   plans: Plan[]
   enrollments: Enrollment[]
+  lessonProgress: LessonProgress[]
   subscriptions: Subscription[]
   payments: Payment[]
   certificates: Certificate[]
@@ -159,4 +169,57 @@ export interface TrackPayload {
   description: string
   categoryId: number
   courseIds: number[]
+}
+
+export interface UserPayload {
+  fullName: string
+  email: string
+  passwordHash: string
+  createdAt: string
+  role: 'student' | 'instructor'
+}
+
+export interface EnrollmentPayload {
+  userId: number
+  courseId: number
+  enrolledAt: string
+  completedAt: string | null
+}
+
+export interface LessonProgressPayload {
+  userId: number
+  lessonId: number
+  completedAt: string | null
+  status: 'Concluido' | 'Em andamento'
+}
+
+export interface CertificatePayload {
+  userId: number
+  courseId: number
+  trackId?: number
+  verificationCode: string
+  issuedAt: string
+}
+
+export interface PlanPayload {
+  name: string
+  description: string
+  price: number
+  durationMonths: number
+}
+
+export interface SubscriptionPayload {
+  userId: number
+  planId: number
+  startDate: string
+  endDate: string
+  status: 'active' | 'paused' | 'cancelled' | 'expired'
+}
+
+export interface PaymentPayload {
+  subscriptionId: number
+  amountPaid: number
+  paymentDate: string
+  paymentMethod: string
+  gatewayTransactionId: string
 }

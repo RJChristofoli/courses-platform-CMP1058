@@ -1,28 +1,39 @@
-import { UserTable } from '@/components/users/user-table'
-import { UsersSummary } from '@/components/users/users-summary'
 import { EmptyState } from '@/components/ui/empty-state'
-import { useDashboardData } from '@/hooks/use-dashboard-data'
+import { UsersWorkspace } from '@/components/users/users-workspace'
+import { usePlatformAdmin } from '@/hooks/use-platform-admin'
 
 export function UsersPage() {
-  const { data, isLoading, error } = useDashboardData()
+  const admin = usePlatformAdmin()
 
-  if (isLoading) {
+  if (admin.isLoading) {
     return <div className="text-sm text-slate-500">Carregando usuarios...</div>
   }
 
-  if (error || !data) {
+  if (admin.error || !admin.data) {
     return (
       <EmptyState
         title="Modulo de usuarios indisponivel"
-        description={error ?? 'Nao foi possivel carregar os dados de usuarios e matriculas.'}
+        description={admin.error ?? 'Nao foi possivel carregar usuarios, matriculas e progresso.'}
       />
     )
   }
 
   return (
-    <div className="space-y-6">
-      <UsersSummary data={data} />
-      <UserTable data={data} />
-    </div>
+    <UsersWorkspace
+      data={admin.data}
+      isSaving={admin.isSaving}
+      createUser={admin.createUser}
+      updateUser={admin.updateUser}
+      deleteUser={admin.deleteUser}
+      createEnrollment={admin.createEnrollment}
+      updateEnrollment={admin.updateEnrollment}
+      deleteEnrollment={admin.deleteEnrollment}
+      createLessonProgress={admin.createLessonProgress}
+      updateLessonProgress={admin.updateLessonProgress}
+      deleteLessonProgress={admin.deleteLessonProgress}
+      createCertificate={admin.createCertificate}
+      updateCertificate={admin.updateCertificate}
+      deleteCertificate={admin.deleteCertificate}
+    />
   )
 }

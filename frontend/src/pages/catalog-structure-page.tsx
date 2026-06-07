@@ -19,7 +19,7 @@ export function CatalogStructurePage() {
   const catalog = data!
 
   async function handleDeleteModule(module: Module) {
-    if (!window.confirm(`Deseja remover o modulo "${module.title}" e suas aulas?`)) return
+    if (!window.confirm(`Deseja remover o módulo "${module.title}" e suas aulas?`)) return
     await deleteModule(module.id)
   }
 

@@ -51,7 +51,7 @@ export function CategoryDialog({
             {initialValue ? 'Editar categoria' : 'Cadastrar categoria'}
           </DialogTitle>
           <DialogDescription>
-            Defina um agrupador claro para relacionar cursos e trilhas academicas.
+            Defina um agrupador claro para relacionar cursos e trilhas acadêmicas.
           </DialogDescription>
         </DialogHeader>
 
@@ -70,7 +70,7 @@ export function CategoryDialog({
             <Input value={name} onChange={(event) => setName(event.target.value)} required />
           </label>
           <label className="block space-y-2 text-sm font-medium text-slate-700">
-            Descricao
+            Descrição
             <Textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
@@ -142,7 +142,7 @@ export function CourseDialog({
         <DialogHeader>
           <DialogTitle>{initialValue ? 'Editar curso' : 'Cadastrar curso'}</DialogTitle>
           <DialogDescription>
-            Cadastre o curso com instrutor, categoria, nivel e dados de publicacao.
+            Cadastre o curso com instrutor, categoria, nível e dados de publicação.
           </DialogDescription>
         </DialogHeader>
 
@@ -157,7 +157,7 @@ export function CourseDialog({
           }}
         >
           <label className="col-span-2 block space-y-2 text-sm font-medium text-slate-700">
-            Titulo do curso
+            Título do curso
             <Input
               value={form.title}
               onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
@@ -165,7 +165,7 @@ export function CourseDialog({
             />
           </label>
           <label className="col-span-2 block space-y-2 text-sm font-medium text-slate-700">
-            Descricao
+            Descrição
             <Textarea
               value={form.description}
               onChange={(event) =>
@@ -209,7 +209,7 @@ export function CourseDialog({
             </select>
           </label>
           <label className="block space-y-2 text-sm font-medium text-slate-700">
-            Nivel
+            Nível
             <select
               className="flex h-10 w-full rounded-xl border border-input bg-white px-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-ring"
               value={form.level}
@@ -221,7 +221,7 @@ export function CourseDialog({
             </select>
           </label>
           <label className="block space-y-2 text-sm font-medium text-slate-700">
-            Publicacao
+            Publicação
             <Input
               type="date"
               value={form.publishedAt}
@@ -343,11 +343,11 @@ export function TrackDialog({
           }}
         >
           <label className="block space-y-2 text-sm font-medium text-slate-700">
-            Titulo da trilha
+            Título da trilha
             <Input value={title} onChange={(event) => setTitle(event.target.value)} required />
           </label>
           <label className="block space-y-2 text-sm font-medium text-slate-700">
-            Descricao
+            Descrição
             <Textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}

@@ -1,5 +1,6 @@
 import { MoreHorizontal } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 
 interface ActionMenuItem {
@@ -15,44 +16,111 @@ interface ActionMenuProps {
 }
 
 export function ActionMenu({ align = 'right', items, triggerClassName }: ActionMenuProps) {
+  const [open, setOpen] = useState(false)
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current || !menuRef.current) return
+
+    const updatePosition = () => {
+      if (!triggerRef.current || !menuRef.current) return
+      const triggerRect = triggerRef.current.getBoundingClientRect()
+      const menuRect = menuRef.current.getBoundingClientRect()
+      const margin = 8
+      const top = Math.min(triggerRect.bottom + margin, window.innerHeight - menuRect.height - margin)
+      const left =
+        align === 'right'
+          ? Math.max(margin, triggerRect.right - menuRect.width)
+          : Math.min(triggerRect.left, window.innerWidth - menuRect.width - margin)
+
+      setPosition({ top, left })
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [align, open])
+
+  useEffect(() => {
+    if (!open) return
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (triggerRef.current?.contains(target) || menuRef.current?.contains(target)) {
+        return
+      }
+      setOpen(false)
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [open])
+
   return (
-    <details className="group relative">
-      <summary
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
         className={cn(
-          'flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-900',
+          'flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:text-slate-900',
           triggerClassName,
         )}
+        onClick={(event) => {
+          event.stopPropagation()
+          setOpen((current) => !current)
+        }}
       >
         <MoreHorizontal className="h-4 w-4" />
-      </summary>
+      </button>
 
-      <div
-        className={cn(
-          'absolute top-10 z-20 min-w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-lg',
-          align === 'right' ? 'right-0' : 'left-0',
-        )}
-      >
-        {items.map((item) => (
-          <button
-            key={item.label}
-            type="button"
-            className={cn(
-              'flex w-full items-center rounded-md px-3 py-2 text-left text-sm transition hover:bg-slate-50',
-              item.tone === 'danger' ? 'text-rose-600' : 'text-slate-700',
-            )}
-            onClick={() => {
-              item.onSelect()
-              const details = document.activeElement?.closest('details') as HTMLDetailsElement | null
-              if (details) {
-                details.removeAttribute('open')
-              }
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-    </details>
+      {open
+        ? createPortal(
+            <div
+              ref={menuRef}
+              className="fixed z-[120] min-w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"
+              style={{ top: position.top, left: position.left }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {items.map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  className={cn(
+                    'flex w-full items-center rounded-md px-3 py-2 text-left text-sm transition hover:bg-slate-50',
+                    item.tone === 'danger' ? 'text-rose-600' : 'text-slate-700',
+                  )}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    item.onSelect()
+                    setOpen(false)
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   )
 }
 
@@ -64,7 +132,7 @@ interface CompactTabsProps {
 
 export function CompactTabs({ tabs, activeHref, onChange }: CompactTabsProps) {
   return (
-    <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5">
+    <div className="flex flex-wrap items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5">
       {tabs.map((tab) => (
         <button
           key={tab.href}
@@ -91,19 +159,21 @@ interface DataTableProps {
 
 export function DataTable({ columns, children }: DataTableProps) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <table className="min-w-full table-fixed border-collapse text-sm">
-        <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-          <tr>
-            {columns.map((column) => (
-              <th key={column} className="border-b border-slate-200 px-4 py-3 font-semibold">
-                {column}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
+    <div className="rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto">
+        <table className="min-w-[720px] w-full border-collapse text-sm">
+          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <tr>
+              {columns.map((column) => (
+                <th key={column} className="border-b border-slate-200 px-4 py-3 font-semibold">
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
     </div>
   )
 }
