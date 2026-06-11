@@ -1,12 +1,6 @@
-import { BookOpen, CreditCard, LayoutDashboard, Users } from 'lucide-react'
+import { BookOpen, CreditCard, Users } from 'lucide-react'
 
 export const navigationItems = [
-  {
-    label: 'Dashboard',
-    description: 'Visao geral da plataforma',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-  },
   {
     label: 'Catalogo',
     description: 'Cursos, categorias e trilhas',

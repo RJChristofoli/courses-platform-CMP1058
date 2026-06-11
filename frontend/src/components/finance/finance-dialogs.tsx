@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type {
-  DashboardData,
+  PlatformData,
   Payment,
   PaymentPayload,
   Plan,
@@ -77,7 +77,7 @@ export function PlanDialog({ open, initialValue, isSaving, onOpenChange, onSubmi
 interface SubscriptionDialogProps {
   open: boolean
   initialValue: Subscription | null
-  data: DashboardData
+  data: PlatformData
   isSaving: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (payload: SubscriptionPayload) => Promise<void>
@@ -154,7 +154,7 @@ export function SubscriptionDialog({ open, initialValue, data, isSaving, onOpenC
 interface PaymentDialogProps {
   open: boolean
   initialValue: Payment | null
-  data: DashboardData
+  data: PlatformData
   isSaving: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (payload: PaymentPayload) => Promise<void>

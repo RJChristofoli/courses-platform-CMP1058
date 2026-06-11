@@ -10,10 +10,10 @@ export function NotFoundPage() {
         </p>
         <h1 className="mt-4 text-4xl font-bold">Pagina nao encontrada</h1>
         <p className="mt-4">
-          O caminho solicitado nao existe nesta etapa do projeto. Vamos te levar de volta ao painel.
+          O caminho solicitado nao existe nesta etapa do projeto. Vamos te levar de volta ao catalogo.
         </p>
         <Button asChild className="mt-8">
-          <Link to="/dashboard">Voltar ao dashboard</Link>
+          <Link to="/catalogo/curso">Voltar ao catalogo</Link>
         </Button>
       </div>
     </main>

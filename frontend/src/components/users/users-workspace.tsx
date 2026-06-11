@@ -9,7 +9,7 @@ import { formatDate } from '@/lib/utils'
 import type {
   Certificate,
   CertificatePayload,
-  DashboardData,
+  PlatformData,
   Enrollment,
   EnrollmentPayload,
   LessonProgress,
@@ -19,7 +19,7 @@ import type {
 } from '@/types/models'
 
 interface UsersWorkspaceProps {
-  data: DashboardData
+  data: PlatformData
   isSaving: boolean
   createUser: (payload: UserPayload) => Promise<void>
   updateUser: (userId: number, payload: UserPayload) => Promise<void>

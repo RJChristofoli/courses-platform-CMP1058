@@ -5,7 +5,6 @@ import { CatalogCategoryPage } from '@/pages/catalog-category-page'
 import { CatalogCoursePage } from '@/pages/catalog-course-page'
 import { CatalogStructurePage } from '@/pages/catalog-structure-page'
 import { CatalogTrackPage } from '@/pages/catalog-track-page'
-import { DashboardPage } from '@/pages/dashboard-page'
 import { FinancePage } from '@/pages/finance-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 import { UsersPage } from '@/pages/users-page'
@@ -14,8 +13,7 @@ function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route index element={<Navigate replace to="/dashboard" />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route index element={<Navigate replace to="/catalogo/curso" />} />
         <Route path="/catalogo" element={<CatalogShell />}>
           <Route index element={<Navigate replace to="/catalogo/categoria" />} />
           <Route path="categoria" element={<CatalogCategoryPage />} />

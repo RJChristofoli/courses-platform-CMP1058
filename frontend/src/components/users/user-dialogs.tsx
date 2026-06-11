@@ -13,7 +13,7 @@ import type {
   Certificate,
   CertificatePayload,
   Course,
-  DashboardData,
+  PlatformData,
   Enrollment,
   EnrollmentPayload,
   LessonProgress,
@@ -95,7 +95,7 @@ export function UserDialog({ open, initialValue, isSaving, onOpenChange, onSubmi
 interface EnrollmentDialogProps {
   open: boolean
   initialValue: Enrollment | null
-  data: DashboardData
+  data: PlatformData
   isSaving: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (payload: EnrollmentPayload) => Promise<void>
@@ -164,7 +164,7 @@ export function EnrollmentDialog({ open, initialValue, data, isSaving, onOpenCha
 interface ProgressDialogProps {
   open: boolean
   initialValue: LessonProgress | null
-  data: DashboardData
+  data: PlatformData
   isSaving: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (payload: LessonProgressPayload) => Promise<void>
@@ -240,7 +240,7 @@ export function ProgressDialog({ open, initialValue, data, isSaving, onOpenChang
 interface CertificateDialogProps {
   open: boolean
   initialValue: Certificate | null
-  data: DashboardData
+  data: PlatformData
   isSaving: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (payload: CertificatePayload) => Promise<void>

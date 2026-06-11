@@ -4,10 +4,6 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 
 const titles: Record<string, { title: string; subtitle: string }> = {
-  '/dashboard': {
-    title: 'Painel de controle',
-    subtitle: 'Uma visão clara da operação acadêmica e financeira.',
-  },
   '/catalogo/categoria': {
     title: 'Catálogo de cursos',
     subtitle: 'Gerencie categorias, cursos, estrutura e trilhas.',
@@ -36,7 +32,7 @@ const titles: Record<string, { title: string; subtitle: string }> = {
 
 export function AppHeader() {
   const location = useLocation()
-  const copy = titles[location.pathname] ?? titles['/dashboard']
+  const copy = titles[location.pathname] ?? titles['/catalogo/curso']
 
   return (
     <header className="flex flex-col gap-3 rounded-[1.5rem] border border-white/70 bg-white/80 px-4 py-4 shadow-soft backdrop-blur md:flex-row md:items-center md:justify-between">

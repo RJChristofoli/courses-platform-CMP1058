@@ -6,7 +6,7 @@ import type {
   CertificatePayload,
   Course,
   CoursePayload,
-  DashboardData,
+  PlatformData,
   Enrollment,
   EnrollmentPayload,
   Lesson,
@@ -54,7 +54,7 @@ async function deleteMany(resource: string, ids: number[]) {
   await Promise.all(ids.map((id) => request<void>(`${resource}/${id}`, { method: 'DELETE' })))
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
+export async function getPlatformData(): Promise<PlatformData> {
   const [
     users,
     categories,
@@ -70,19 +70,19 @@ export async function getDashboardData(): Promise<DashboardData> {
     payments,
     certificates,
   ] = await Promise.all([
-    request<DashboardData['users']>('users'),
-    request<DashboardData['categories']>('categories'),
-    request<DashboardData['courses']>('courses'),
-    request<DashboardData['modules']>('modules'),
-    request<DashboardData['lessons']>('lessons'),
-    request<DashboardData['tracks']>('tracks'),
-    request<DashboardData['trackCourses']>('trackCourses'),
-    request<DashboardData['plans']>('plans'),
-    request<DashboardData['enrollments']>('enrollments'),
-    request<DashboardData['lessonProgress']>('lessonProgress'),
-    request<DashboardData['subscriptions']>('subscriptions'),
-    request<DashboardData['payments']>('payments'),
-    request<DashboardData['certificates']>('certificates'),
+    request<PlatformData['users']>('users'),
+    request<PlatformData['categories']>('categories'),
+    request<PlatformData['courses']>('courses'),
+    request<PlatformData['modules']>('modules'),
+    request<PlatformData['lessons']>('lessons'),
+    request<PlatformData['tracks']>('tracks'),
+    request<PlatformData['trackCourses']>('trackCourses'),
+    request<PlatformData['plans']>('plans'),
+    request<PlatformData['enrollments']>('enrollments'),
+    request<PlatformData['lessonProgress']>('lessonProgress'),
+    request<PlatformData['subscriptions']>('subscriptions'),
+    request<PlatformData['payments']>('payments'),
+    request<PlatformData['certificates']>('certificates'),
   ])
 
   return {

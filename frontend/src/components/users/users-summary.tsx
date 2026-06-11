@@ -1,10 +1,10 @@
 import { GraduationCap, ShieldCheck, UserRound } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import type { DashboardData } from '@/types/models'
+import type { PlatformData } from '@/types/models'
 
 interface UsersSummaryProps {
-  data: DashboardData
+  data: PlatformData
 }
 
 export function UsersSummary({ data }: UsersSummaryProps) {

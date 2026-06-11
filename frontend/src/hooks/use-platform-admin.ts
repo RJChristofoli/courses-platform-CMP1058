@@ -14,7 +14,7 @@ import {
   deletePlan,
   deleteSubscription,
   deleteUser,
-  getDashboardData,
+  getPlatformData,
   removePaymentsBySubscription,
   removeUserRelations,
   updateCertificate,
@@ -27,7 +27,7 @@ import {
 } from '@/services/api'
 import type {
   CertificatePayload,
-  DashboardData,
+  PlatformData,
   EnrollmentPayload,
   LessonProgressPayload,
   PaymentPayload,
@@ -37,7 +37,7 @@ import type {
 } from '@/types/models'
 
 interface PlatformAdminState {
-  data: DashboardData | null
+  data: PlatformData | null
   isLoading: boolean
   isSaving: boolean
   error: string | null
@@ -55,7 +55,7 @@ export function usePlatformAdmin() {
     setState((current) => ({ ...current, isLoading: true, error: null }))
 
     try {
-      const data = await getDashboardData()
+      const data = await getPlatformData()
       setState({ data, isLoading: false, isSaving: false, error: null })
     } catch {
       setState({
@@ -76,7 +76,7 @@ export function usePlatformAdmin() {
 
     try {
       await operation()
-      const data = await getDashboardData()
+      const data = await getPlatformData()
       setState({ data, isLoading: false, isSaving: false, error: null })
     } catch {
       setState((current) => ({

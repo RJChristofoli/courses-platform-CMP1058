@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDate } from '@/lib/utils'
-import type { DashboardData } from '@/types/models'
+import type { PlatformData } from '@/types/models'
 
 interface UserTableProps {
-  data: DashboardData
+  data: PlatformData
 }
 
 export function UserTable({ data }: UserTableProps) {

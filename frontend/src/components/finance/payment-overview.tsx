@@ -1,10 +1,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import type { DashboardData } from '@/types/models'
+import type { PlatformData } from '@/types/models'
 
 interface PaymentOverviewProps {
-  data: DashboardData
+  data: PlatformData
 }
 
 export function PaymentOverview({ data }: PaymentOverviewProps) {

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { PaymentDialog, PlanDialog, SubscriptionDialog } from '@/components/finance/finance-dialogs'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type {
-  DashboardData,
+  PlatformData,
   Payment,
   PaymentPayload,
   Plan,
@@ -17,7 +17,7 @@ import type {
 } from '@/types/models'
 
 interface FinanceWorkspaceProps {
-  data: DashboardData
+  data: PlatformData
   isSaving: boolean
   createPlan: (payload: PlanPayload) => Promise<void>
   updatePlan: (planId: number, payload: PlanPayload) => Promise<void>

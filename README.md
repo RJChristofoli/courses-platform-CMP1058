@@ -49,14 +49,6 @@ Servicos disponiveis:
 - CRUD de pagamentos
 - Relacionamento entre aluno, plano, assinatura e receita simulada
 
-### Dashboard
-
-- KPIs operacionais principais
-- Cursos que pedem estrutura
-- Alunos com menor progresso
-- Assinaturas com vencimento proximo
-- Pagamentos recentes
-
 ## Estrutura do projeto
 
 ```text

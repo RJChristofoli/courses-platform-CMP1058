@@ -107,7 +107,7 @@ export interface Certificate {
   issuedAt: string
 }
 
-export interface DashboardData {
+export interface PlatformData {
   users: User[]
   categories: Category[]
   courses: Course[]

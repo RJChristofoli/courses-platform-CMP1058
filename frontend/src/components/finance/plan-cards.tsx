@@ -3,10 +3,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/utils'
-import type { DashboardData } from '@/types/models'
+import type { PlatformData } from '@/types/models'
 
 interface PlanCardsProps {
-  data: DashboardData
+  data: PlatformData
 }
 
 export function PlanCards({ data }: PlanCardsProps) {
