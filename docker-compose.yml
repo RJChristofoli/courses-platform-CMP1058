@@ -1,16 +1,42 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: courses_platform
+      POSTGRES_USER: courses
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-courses_dev_only}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U courses -d courses_platform"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
   backend:
     build:
       context: ./backend
-    container_name: courses-platform-backend
+    environment:
+      DATABASE_URL: postgresql://courses:${POSTGRES_PASSWORD:-courses_dev_only}@postgres:5432/courses_platform?schema=public
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-change-before-use-123456}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      PORT: 3001
+      CORS_ORIGINS: http://localhost:4173,http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "3001:3001"
 
   frontend:
     build:
       context: ./frontend
-    container_name: courses-platform-frontend
     depends_on:
       - backend
     ports:
       - "4173:80"
+
+volumes:
+  postgres-data:
