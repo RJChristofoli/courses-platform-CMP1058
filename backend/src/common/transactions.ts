@@ -21,7 +21,7 @@ export async function withSerializableRetry<T>(
 }
 
 export async function advisoryLock(transaction: TransactionClient, key: string) {
-  await transaction.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`
+  await transaction.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0)) IS NULL AS acquired`
 }
 
 export function lockCourseLearning(transaction: TransactionClient, courseId: number) {

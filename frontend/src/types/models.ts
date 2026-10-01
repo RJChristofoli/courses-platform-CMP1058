@@ -2,9 +2,8 @@ export interface User {
   id: number
   fullName: string
   email: string
-  passwordHash: string
   createdAt: string
-  role: 'student' | 'instructor'
+  role: 'admin' | 'student' | 'instructor'
 }
 
 export interface Category {
@@ -60,7 +59,7 @@ export interface Plan {
   id: number
   name: string
   description: string
-  price: number
+  price: string
   durationMonths: number
 }
 
@@ -92,7 +91,7 @@ export interface Subscription {
 export interface Payment {
   id: number
   subscriptionId: number
-  amountPaid: number
+  amountPaid: string
   paymentDate: string
   paymentMethod: string
   gatewayTransactionId: string
@@ -102,7 +101,7 @@ export interface Certificate {
   id: number
   userId: number
   courseId: number
-  trackId?: number
+  trackId: number | null
   verificationCode: string
   issuedAt: string
 }
@@ -145,8 +144,6 @@ export interface CoursePayload {
   categoryId: number
   level: string
   publishedAt: string
-  totalLessons: number
-  totalHours: number
 }
 
 export interface ModulePayload {
@@ -174,37 +171,35 @@ export interface TrackPayload {
 export interface UserPayload {
   fullName: string
   email: string
-  passwordHash: string
-  createdAt: string
-  role: 'student' | 'instructor'
+  password: string
+  role: 'admin' | 'student' | 'instructor'
 }
+
+export type UserUpdatePayload = Omit<UserPayload, 'password'> & { password?: string }
 
 export interface EnrollmentPayload {
   userId: number
   courseId: number
   enrolledAt: string
-  completedAt: string | null
 }
 
 export interface LessonProgressPayload {
   userId: number
   lessonId: number
-  completedAt: string | null
+  completedAt?: string | null
   status: 'Concluido' | 'Em andamento'
 }
 
 export interface CertificatePayload {
   userId: number
   courseId: number
-  trackId?: number
-  verificationCode: string
-  issuedAt: string
+  trackId?: number | null
 }
 
 export interface PlanPayload {
   name: string
   description: string
-  price: number
+  price: string
   durationMonths: number
 }
 
@@ -218,7 +213,7 @@ export interface SubscriptionPayload {
 
 export interface PaymentPayload {
   subscriptionId: number
-  amountPaid: number
+  amountPaid: string
   paymentDate: string
   paymentMethod: string
   gatewayTransactionId: string

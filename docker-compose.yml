@@ -9,6 +9,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./backend/docker/postgres-init/10-create-test-db.sh:/docker-entrypoint-initdb.d/10-create-test-db.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U courses -d courses_platform"]
       interval: 5s
@@ -24,6 +25,9 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
       PORT: 3001
       CORS_ORIGINS: http://localhost:4173,http://localhost:5173
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-Admin123!}
+      SEED_INSTRUCTOR_PASSWORD: ${SEED_INSTRUCTOR_PASSWORD:-Instructor123!}
+      SEED_STUDENT_PASSWORD: ${SEED_STUDENT_PASSWORD:-Student123!}
     depends_on:
       postgres:
         condition: service_healthy

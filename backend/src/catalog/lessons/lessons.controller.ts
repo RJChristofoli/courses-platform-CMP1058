@@ -6,20 +6,25 @@ import { ParsePositiveIntPipe } from '../../common/pipes/parse-positive-int.pipe
 import { AuthenticatedUser } from '../../common/authenticated-user'
 import { CreateLessonDto, ListLessonsDto, ReorderLessonsDto, UpdateLessonDto } from './dto/lesson.dto'
 import { LessonsService } from './lessons.service'
+import { ApiCommonErrors, ApiCreatedItemResponse, ApiDeletedResponse, ApiItemResponse, ApiListResponse } from '../../common/openapi/api-docs'
+import { ApiErrorResponseDto, LessonResponseDto } from '../../common/openapi/api-models.dto'
 
 @ApiTags('Lessons')
 @ApiBearerAuth()
+@ApiCommonErrors()
 @Controller()
 export class LessonsController {
   constructor(private readonly lessons: LessonsService) {}
 
   @Get('lessons')
   @ApiOperation({ summary: 'Lista aulas; instructor recebe apenas aulas dos próprios cursos' })
+  @ApiListResponse(LessonResponseDto, 'Aulas ordenadas por módulo e posição')
   list(@Query() filter: ListLessonsDto, @CurrentUser() actor: AuthenticatedUser) {
     return this.lessons.list(filter, actor)
   }
 
   @Get('lessons/:id')
+  @ApiItemResponse(LessonResponseDto, 'Aula consultada')
   get(@Param('id', ParsePositiveIntPipe) id: number, @CurrentUser() actor: AuthenticatedUser) {
     return this.lessons.get(id, actor)
   }
@@ -27,12 +32,14 @@ export class LessonsController {
   @Post('lessons')
   @Roles('admin')
   @ApiOperation({ summary: 'Cria aula em um módulo (admin)' })
+  @ApiCreatedItemResponse(LessonResponseDto, 'Aula criada com posição')
   create(@Body() input: CreateLessonDto) { return this.lessons.create(input) }
 
   @Put('lessons/:id')
   @Roles('admin')
   @ApiOperation({ summary: 'Atualiza aula e sua posição (admin)' })
-  @ApiResponse({ status: 409, description: 'Aula não pode mudar de curso' })
+  @ApiItemResponse(LessonResponseDto, 'Aula atualizada')
+  @ApiResponse({ status: 409, type: ApiErrorResponseDto, description: 'Aula não pode mudar de curso' })
   update(@Param('id', ParsePositiveIntPipe) id: number, @Body() input: UpdateLessonDto) {
     return this.lessons.update(id, input)
   }
@@ -40,7 +47,8 @@ export class LessonsController {
   @Put('courses/:courseId/lessons/order')
   @Roles('admin')
   @ApiOperation({ summary: 'Substitui a ordem e módulo de todas as aulas do curso' })
-  @ApiResponse({ status: 409, description: 'Lista não corresponde à estrutura atual' })
+  @ApiListResponse(LessonResponseDto, 'Aulas atualizadas em transação')
+  @ApiResponse({ status: 409, type: ApiErrorResponseDto, description: 'Lista não corresponde à estrutura atual' })
   reorder(
     @Param('courseId', ParsePositiveIntPipe) courseId: number,
     @Body() input: ReorderLessonsDto,
@@ -51,6 +59,6 @@ export class LessonsController {
   @Delete('lessons/:id')
   @Roles('admin')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiResponse({ status: 204 })
+  @ApiDeletedResponse('Aula removida e conclusão do curso recalculada')
   remove(@Param('id', ParsePositiveIntPipe) id: number) { return this.lessons.remove(id) }
 }

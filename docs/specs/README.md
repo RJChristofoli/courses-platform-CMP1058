@@ -6,7 +6,7 @@ Especificar a substituição do JSON Server por NestJS, JWT, Swagger, PostgreSQL
 
 Contexto: trabalho de faculdade, sem sistema em produção. O banco pode ser criado do zero. Não haverá importação obrigatória do `backend/db.json`, coexistência de backends ou estratégia de migração de dados existentes. Migrations do Prisma continuam necessárias para reproduzir a estrutura do banco.
 
-Status: pronto para implementação com as premissas de produto abaixo. Mudanças nessas premissas devem ser registradas nas specs antes de alterar os contratos.
+Status: implementadas nesta entrega; os critérios abaixo permanecem como referência para validação manual. Mudanças nessas premissas devem ser registradas nas specs antes de alterar os contratos.
 
 ## Documentos e ordem de implementação
 

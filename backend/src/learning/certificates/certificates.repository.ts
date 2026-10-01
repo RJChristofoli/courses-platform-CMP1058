@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { randomUUID } from 'node:crypto'
 import { Prisma } from '@prisma/client'
-import { AuthenticatedUser } from '../../common/authenticated-user'
 import { httpError } from '../../common/http-error'
 import { advisoryLock, lockCourseLearning, withSerializableRetry } from '../../common/transactions'
 import { PrismaService } from '../../prisma/prisma.service'

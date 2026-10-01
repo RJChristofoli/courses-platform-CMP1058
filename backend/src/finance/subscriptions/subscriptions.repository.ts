@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { Prisma, SubscriptionStatus } from '@prisma/client'
-import { AuthenticatedUser } from '../../common/authenticated-user'
 import { httpError } from '../../common/http-error'
 import { advisoryLock } from '../../common/transactions'
 import { PrismaService } from '../../prisma/prisma.service'

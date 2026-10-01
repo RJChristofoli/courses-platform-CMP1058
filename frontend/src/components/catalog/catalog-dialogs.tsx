@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { dateInputToUtc } from '@/lib/utils'
 import type {
   AcademicCatalogData,
   Category,
@@ -115,8 +116,6 @@ export function CourseDialog({
     categoryId: 0,
     level: 'Iniciante',
     publishedAt: new Date().toISOString().slice(0, 10),
-    totalLessons: 1,
-    totalHours: 1,
   })
 
   useEffect(() => {
@@ -131,8 +130,6 @@ export function CourseDialog({
       level: initialValue?.level ?? 'Iniciante',
       publishedAt:
         initialValue?.publishedAt.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
-      totalLessons: initialValue?.totalLessons ?? 1,
-      totalHours: initialValue?.totalHours ?? 1,
     })
   }, [data.categories, data.users, initialValue, open])
 
@@ -152,7 +149,7 @@ export function CourseDialog({
             event.preventDefault()
             void onSubmit({
               ...form,
-              publishedAt: new Date(form.publishedAt).toISOString(),
+              publishedAt: dateInputToUtc(form.publishedAt),
             })
           }}
         >
@@ -230,28 +227,11 @@ export function CourseDialog({
               }
             />
           </label>
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            Total de aulas
-            <Input
-              type="number"
-              min={1}
-              value={form.totalLessons}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, totalLessons: Number(event.target.value) }))
-              }
-            />
-          </label>
-          <label className="block space-y-2 text-sm font-medium text-slate-700">
-            Total de horas
-            <Input
-              type="number"
-              min={1}
-              value={form.totalHours}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, totalHours: Number(event.target.value) }))
-              }
-            />
-          </label>
+          {initialValue ? (
+            <p className="col-span-2 text-sm text-slate-500">
+              Totais calculados pelo conteúdo: {initialValue.totalLessons} aulas e {initialValue.totalHours} horas.
+            </p>
+          ) : null}
           <div className="col-span-2 mt-2">
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

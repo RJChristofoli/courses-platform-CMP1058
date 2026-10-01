@@ -26,21 +26,33 @@ import type {
   TrackPayload,
   User,
   UserPayload,
+  UserUpdatePayload,
 } from '@/types/models'
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+import { API_BASE_URL, clearSession, getSessionToken } from '@/services/session'
 
 async function request<T>(resource: string, init?: RequestInit) {
+  const token = getSessionToken()
+  const headers = new Headers(init?.headers)
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+  if (token && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${token}`)
   const response = await fetch(`${API_BASE_URL}/${resource}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
     ...init,
+    headers,
   })
 
   if (!response.ok) {
-    throw new Error(`Falha ao processar ${resource}`)
+    const problem = await response.json().catch(() => null) as {
+      message?: string | string[]
+      details?: Array<{ message?: string }>
+    } | null
+    if (response.status === 401 && resource !== 'auth/login' && getSessionToken() === token) clearSession()
+    const detailMessages = problem?.details?.map((detail) => detail.message).filter((message): message is string => Boolean(message))
+    const message = detailMessages?.length
+      ? detailMessages.join('; ')
+      : Array.isArray(problem?.message)
+      ? problem.message.join('; ')
+      : problem?.message
+    throw new Error(message ?? `Falha ao processar ${resource}`)
   }
 
   if (response.status === 204) {
@@ -48,10 +60,6 @@ async function request<T>(resource: string, init?: RequestInit) {
   }
 
   return (await response.json()) as T
-}
-
-async function deleteMany(resource: string, ids: number[]) {
-  await Promise.all(ids.map((id) => request<void>(`${resource}/${id}`, { method: 'DELETE' })))
 }
 
 export async function getPlatformData(): Promise<PlatformData> {
@@ -156,6 +164,13 @@ export function updateModule(moduleId: number, payload: ModulePayload) {
   return request<Module>(`modules/${moduleId}`, { method: 'PUT', body: JSON.stringify(payload) })
 }
 
+export function reorderModules(courseId: number, moduleIds: number[]) {
+  return request<Module[]>(`courses/${courseId}/modules/order`, {
+    method: 'PUT',
+    body: JSON.stringify({ moduleIds }),
+  })
+}
+
 export function deleteModule(moduleId: number) {
   return request<void>(`modules/${moduleId}`, { method: 'DELETE' })
 }
@@ -168,55 +183,37 @@ export function updateLesson(lessonId: number, payload: LessonPayload) {
   return request<Lesson>(`lessons/${lessonId}`, { method: 'PUT', body: JSON.stringify(payload) })
 }
 
+export function reorderLessons(courseId: number, lessons: Array<{ id: number; moduleId: number; order: number }>) {
+  return request<Lesson[]>(`courses/${courseId}/lessons/order`, {
+    method: 'PUT',
+    body: JSON.stringify({ lessons }),
+  })
+}
+
 export function deleteLesson(lessonId: number) {
   return request<void>(`lessons/${lessonId}`, { method: 'DELETE' })
 }
 
-async function createTrackRelations(trackId: number, courseIds: number[]) {
-  await Promise.all(
-    courseIds.map((courseId, index) =>
-      request<TrackCourse>('trackCourses', {
-        method: 'POST',
-        body: JSON.stringify({ trackId, courseId, order: index + 1 }),
-      }),
-    ),
-  )
+export function createTrack(payload: TrackPayload) {
+  return request<Track>('tracks', { method: 'POST', body: JSON.stringify(payload) })
 }
 
-export async function removeTrackRelations(trackId: number) {
-  const relations = await request<TrackCourse[]>(`trackCourses?trackId=${trackId}`)
-  await deleteMany('trackCourses', relations.map((relation) => relation.id))
-}
-
-export async function createTrack(payload: TrackPayload) {
-  const { courseIds, ...trackPayload } = payload
-  const track = await request<Track>('tracks', { method: 'POST', body: JSON.stringify(trackPayload) })
-  await createTrackRelations(track.id, courseIds)
-  return track
-}
-
-export async function updateTrack(trackId: number, payload: TrackPayload) {
-  const { courseIds, ...trackPayload } = payload
-  const track = await request<Track>(`tracks/${trackId}`, {
+export function updateTrack(trackId: number, payload: TrackPayload) {
+  return request<Track>(`tracks/${trackId}`, {
     method: 'PUT',
-    body: JSON.stringify(trackPayload),
+    body: JSON.stringify(payload),
   })
-
-  await removeTrackRelations(trackId)
-  await createTrackRelations(trackId, courseIds)
-  return track
 }
 
-export async function deleteTrack(trackId: number) {
-  await removeTrackRelations(trackId)
-  await request<void>(`tracks/${trackId}`, { method: 'DELETE' })
+export function deleteTrack(trackId: number) {
+  return request<void>(`tracks/${trackId}`, { method: 'DELETE' })
 }
 
 export function createUser(payload: UserPayload) {
   return request<User>('users', { method: 'POST', body: JSON.stringify(payload) })
 }
 
-export function updateUser(userId: number, payload: UserPayload) {
+export function updateUser(userId: number, payload: UserUpdatePayload) {
   return request<User>(`users/${userId}`, { method: 'PUT', body: JSON.stringify(payload) })
 }
 
@@ -297,71 +294,4 @@ export function updatePayment(paymentId: number, payload: PaymentPayload) {
 
 export function deletePayment(paymentId: number) {
   return request<void>(`payments/${paymentId}`, { method: 'DELETE' })
-}
-
-export async function removeCourseRelations(courseId: number) {
-  const [relations, enrollments, certificates] = await Promise.all([
-    request<TrackCourse[]>(`trackCourses?courseId=${courseId}`),
-    request<Enrollment[]>(`enrollments?courseId=${courseId}`),
-    request<Certificate[]>(`certificates?courseId=${courseId}`),
-  ])
-
-  await Promise.all([
-    deleteMany('trackCourses', relations.map((relation) => relation.id)),
-    deleteMany('enrollments', enrollments.map((enrollment) => enrollment.id)),
-    deleteMany('certificates', certificates.map((certificate) => certificate.id)),
-  ])
-}
-
-export async function removeProgressByLesson(lessonId: number) {
-  const progress = await request<LessonProgress[]>(`lessonProgress?lessonId=${lessonId}`)
-  await deleteMany('lessonProgress', progress.map((item) => item.id))
-}
-
-export async function removeLessonsByModule(moduleId: number) {
-  const lessons = await request<Lesson[]>(`lessons?moduleId=${moduleId}`)
-
-  await Promise.all(
-    lessons.map(async (lesson) => {
-      await removeProgressByLesson(lesson.id)
-      await request<void>(`lessons/${lesson.id}`, { method: 'DELETE' })
-    }),
-  )
-}
-
-export async function removeModulesByCourse(courseId: number) {
-  const modules = await request<Module[]>(`modules?courseId=${courseId}`)
-
-  await Promise.all(
-    modules.map(async (module) => {
-      await removeLessonsByModule(module.id)
-      await request<void>(`modules/${module.id}`, { method: 'DELETE' })
-    }),
-  )
-}
-
-export async function removePaymentsBySubscription(subscriptionId: number) {
-  const payments = await request<Payment[]>(`payments?subscriptionId=${subscriptionId}`)
-  await deleteMany('payments', payments.map((payment) => payment.id))
-}
-
-export async function removeUserRelations(userId: number) {
-  const [enrollments, progress, certificates, subscriptions] = await Promise.all([
-    request<Enrollment[]>(`enrollments?userId=${userId}`),
-    request<LessonProgress[]>(`lessonProgress?userId=${userId}`),
-    request<Certificate[]>(`certificates?userId=${userId}`),
-    request<Subscription[]>(`subscriptions?userId=${userId}`),
-  ])
-
-  await Promise.all([
-    deleteMany('enrollments', enrollments.map((item) => item.id)),
-    deleteMany('lessonProgress', progress.map((item) => item.id)),
-    deleteMany('certificates', certificates.map((item) => item.id)),
-    Promise.all(
-      subscriptions.map(async (subscription) => {
-        await removePaymentsBySubscription(subscription.id)
-        await deleteSubscription(subscription.id)
-      }),
-    ),
-  ])
 }

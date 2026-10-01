@@ -7,24 +7,27 @@ import { CreateUserDto } from './dto/create-user.dto'
 import { ListUsersDto } from './dto/list-users.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UsersService } from './users.service'
+import { ApiCommonErrors, ApiCreatedItemResponse, ApiDeletedResponse, ApiItemResponse, ApiListResponse } from '../common/openapi/api-docs'
+import { ApiErrorResponseDto, UserResponseDto } from '../common/openapi/api-models.dto'
 
 @ApiTags('Users')
 @ApiBearerAuth()
+@ApiCommonErrors()
 @Controller('users')
 export class UsersController {
   constructor(private readonly users: UsersService) {}
 
   @Get()
   @ApiOperation({ summary: 'Lista usuários; exclusivo do perfil admin' })
-  @ApiResponse({ status: 200, description: 'Usuários públicos, sem hash de senha' })
-  @ApiResponse({ status: 403, description: 'Perfil sem permissão' })
+  @ApiListResponse(UserResponseDto, 'Usuários públicos, sem hash de senha')
   list(@CurrentUser() actor: AuthenticatedUser, @Query() filter: ListUsersDto) {
     return this.users.list(actor, filter)
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Consulta perfil; admin ou o próprio usuário' })
-  @ApiResponse({ status: 404, description: 'Usuário inexistente ou fora do escopo' })
+  @ApiItemResponse(UserResponseDto, 'Perfil público do usuário')
+  @ApiResponse({ status: 404, type: ApiErrorResponseDto, description: 'Usuário inexistente ou fora do escopo' })
   findOne(@Param('id', ParseIntPipe) id: number, @CurrentUser() actor: AuthenticatedUser) {
     return this.users.findOne(id, actor)
   }
@@ -32,8 +35,7 @@ export class UsersController {
   @Post()
   @Roles('admin')
   @ApiOperation({ summary: 'Cadastra usuário (admin)' })
-  @ApiResponse({ status: 201, description: 'Usuário sem hash de senha' })
-  @ApiResponse({ status: 409, description: 'Email já cadastrado' })
+  @ApiCreatedItemResponse(UserResponseDto, 'Usuário criado, sem hash de senha')
   create(@Body() input: CreateUserDto) {
     return this.users.create(input)
   }
@@ -41,8 +43,8 @@ export class UsersController {
   @Put(':id')
   @Roles('admin')
   @ApiOperation({ summary: 'Atualiza usuário (admin)' })
-  @ApiResponse({ status: 200, description: 'Usuário sem hash de senha' })
-  @ApiResponse({ status: 409, description: 'Mudança impeditiva por integridade' })
+  @ApiItemResponse(UserResponseDto, 'Usuário atualizado, sem hash de senha')
+  @ApiResponse({ status: 409, type: ApiErrorResponseDto, description: 'Mudança impeditiva por integridade' })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() input: UpdateUserDto,
@@ -55,8 +57,7 @@ export class UsersController {
   @Roles('admin')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Exclui usuário e os dados próprios definidos pelas FKs (admin)' })
-  @ApiResponse({ status: 204, description: 'Usuário excluído' })
-  @ApiResponse({ status: 409, description: 'Instrutor ainda atribuído a cursos' })
+  @ApiDeletedResponse('Usuário excluído')
   async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() actor: AuthenticatedUser) {
     await this.users.remove(id, actor)
   }

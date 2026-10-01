@@ -2,6 +2,8 @@ import { Search } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/contexts/auth-context'
 
 const titles: Record<string, { title: string; subtitle: string }> = {
   '/catalogo/categoria': {
@@ -31,8 +33,10 @@ const titles: Record<string, { title: string; subtitle: string }> = {
 }
 
 export function AppHeader() {
+  const { user, logout } = useAuth()
   const location = useLocation()
   const copy = titles[location.pathname] ?? titles['/catalogo/curso']
+  const initials = user?.fullName.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() ?? 'U'
 
   return (
     <header className="flex flex-col gap-3 rounded-[1.5rem] border border-white/70 bg-white/80 px-4 py-4 shadow-soft backdrop-blur md:flex-row md:items-center md:justify-between">
@@ -48,13 +52,14 @@ export function AppHeader() {
         </div>
         <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
           <Avatar>
-            <AvatarFallback>RL</AvatarFallback>
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">Rafael Lima</p>
-            <p className="truncate text-xs text-slate-500">Coordenação acadêmica</p>
+            <p className="truncate text-sm font-semibold text-slate-900">{user?.fullName}</p>
+            <p className="truncate text-xs text-slate-500">Administrador</p>
           </div>
         </div>
+        <Button variant="outline" size="sm" onClick={logout}>Sair</Button>
       </div>
     </header>
   )

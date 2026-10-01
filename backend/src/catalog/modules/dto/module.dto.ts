@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { ArrayNotContains, ArrayUnique, IsArray, IsInt, IsOptional, IsString, Length, Min } from 'class-validator'
+import { ArrayUnique, IsArray, IsInt, IsOptional, IsString, Length, Min } from 'class-validator'
 
 export class CreateModuleDto {
   @ApiProperty({ minimum: 1 })

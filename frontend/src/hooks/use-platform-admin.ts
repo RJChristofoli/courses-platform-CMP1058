@@ -15,8 +15,6 @@ import {
   deleteSubscription,
   deleteUser,
   getPlatformData,
-  removePaymentsBySubscription,
-  removeUserRelations,
   updateCertificate,
   updateEnrollment,
   updateLessonProgress,
@@ -34,6 +32,7 @@ import type {
   PlanPayload,
   SubscriptionPayload,
   UserPayload,
+  UserUpdatePayload,
 } from '@/types/models'
 
 interface PlatformAdminState {
@@ -57,12 +56,12 @@ export function usePlatformAdmin() {
     try {
       const data = await getPlatformData()
       setState({ data, isLoading: false, isSaving: false, error: null })
-    } catch {
+    } catch (cause) {
       setState({
         data: null,
         isLoading: false,
         isSaving: false,
-        error: 'Nao foi possivel carregar os dados operacionais da plataforma.',
+        error: cause instanceof Error ? cause.message : 'Nao foi possivel carregar os dados operacionais da plataforma.',
       })
     }
   }, [])
@@ -78,13 +77,13 @@ export function usePlatformAdmin() {
       await operation()
       const data = await getPlatformData()
       setState({ data, isLoading: false, isSaving: false, error: null })
-    } catch {
+    } catch (cause) {
       setState((current) => ({
         ...current,
         isSaving: false,
-        error: 'Nao foi possivel concluir a alteracao solicitada.',
+        error: cause instanceof Error ? cause.message : 'Nao foi possivel concluir a alteracao solicitada.',
       }))
-      throw new Error('platform-admin-operation-failed')
+      throw cause
     }
   }, [])
 
@@ -92,12 +91,8 @@ export function usePlatformAdmin() {
     ...state,
     reload: load,
     createUser: (payload: UserPayload) => execute(() => createUser(payload)),
-    updateUser: (userId: number, payload: UserPayload) => execute(() => updateUser(userId, payload)),
-    deleteUser: (userId: number) =>
-      execute(async () => {
-        await removeUserRelations(userId)
-        await deleteUser(userId)
-      }),
+    updateUser: (userId: number, payload: UserUpdatePayload) => execute(() => updateUser(userId, payload)),
+    deleteUser: (userId: number) => execute(() => deleteUser(userId)),
     createEnrollment: (payload: EnrollmentPayload) => execute(() => createEnrollment(payload)),
     updateEnrollment: (enrollmentId: number, payload: EnrollmentPayload) =>
       execute(() => updateEnrollment(enrollmentId, payload)),
@@ -116,11 +111,7 @@ export function usePlatformAdmin() {
     createSubscription: (payload: SubscriptionPayload) => execute(() => createSubscription(payload)),
     updateSubscription: (subscriptionId: number, payload: SubscriptionPayload) =>
       execute(() => updateSubscription(subscriptionId, payload)),
-    deleteSubscription: (subscriptionId: number) =>
-      execute(async () => {
-        await removePaymentsBySubscription(subscriptionId)
-        await deleteSubscription(subscriptionId)
-      }),
+    deleteSubscription: (subscriptionId: number) => execute(() => deleteSubscription(subscriptionId)),
     createPayment: (payload: PaymentPayload) => execute(() => createPayment(payload)),
     updatePayment: (paymentId: number, payload: PaymentPayload) =>
       execute(() => updatePayment(paymentId, payload)),

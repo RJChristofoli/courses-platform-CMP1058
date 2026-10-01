@@ -11,9 +11,8 @@ import {
   deleteModule,
   deleteTrack,
   getAcademicCatalogData,
-  removeCourseRelations,
-  removeLessonsByModule,
-  removeModulesByCourse,
+  reorderLessons as reorderCatalogLessons,
+  reorderModules as reorderCatalogModules,
   updateCategory,
   updateCourse,
   updateLesson,
@@ -50,12 +49,12 @@ export function useAcademicCatalog() {
     try {
       const data = await getAcademicCatalogData()
       setState({ data, isLoading: false, isSaving: false, error: null })
-    } catch {
+    } catch (cause) {
       setState({
         data: null,
         isLoading: false,
         isSaving: false,
-        error: 'Nao foi possivel carregar o modulo academico.',
+        error: cause instanceof Error ? cause.message : 'Nao foi possivel carregar o modulo academico.',
       })
     }
   }, [])
@@ -72,13 +71,13 @@ export function useAcademicCatalog() {
         await operation()
         const data = await getAcademicCatalogData()
         setState({ data, isLoading: false, isSaving: false, error: null })
-      } catch {
+      } catch (cause) {
         setState((current) => ({
           ...current,
           isSaving: false,
-          error: 'Nao foi possivel salvar as alteracoes do catalogo.',
+          error: cause instanceof Error ? cause.message : 'Nao foi possivel salvar as alteracoes do catalogo.',
         }))
-        throw new Error('academic-catalog-save-failed')
+        throw cause
       }
     },
     [],
@@ -92,56 +91,23 @@ export function useAcademicCatalog() {
     deleteCategory: (categoryId: number) => execute(() => deleteCategory(categoryId)),
     createCourse: (payload: CoursePayload) => execute(() => createCourse(payload)),
     updateCourse: (courseId: number, payload: CoursePayload) => execute(() => updateCourse(courseId, payload)),
-    deleteCourse: (courseId: number) =>
-      execute(async () => {
-        await removeCourseRelations(courseId)
-        await removeModulesByCourse(courseId)
-        await deleteCourse(courseId)
-      }),
+    deleteCourse: (courseId: number) => execute(() => deleteCourse(courseId)),
     createModule: (payload: ModulePayload) => execute(() => createModule(payload)),
     updateModule: (moduleId: number, payload: ModulePayload) => execute(() => updateModule(moduleId, payload)),
-    deleteModule: (moduleId: number) =>
-      execute(async () => {
-        await removeLessonsByModule(moduleId)
-        await deleteModule(moduleId)
-      }),
+    deleteModule: (moduleId: number) => execute(() => deleteModule(moduleId)),
     createLesson: (payload: LessonPayload) => execute(() => createLesson(payload)),
     updateLesson: (lessonId: number, payload: LessonPayload) => execute(() => updateLesson(lessonId, payload)),
     deleteLesson: (lessonId: number) => execute(() => deleteLesson(lessonId)),
     reorderModules: (courseId: number, orderedModuleIds: number[]) =>
       execute(async () => {
-        const data = state.data
-        if (!data) return
-        const modules = data.modules.filter((module) => module.courseId === courseId)
-        await Promise.all(
-          orderedModuleIds.map((moduleId, index) => {
-            const module = modules.find((item) => item.id === moduleId)
-            if (!module) return Promise.resolve()
-            return updateModule(module.id, { courseId, title: module.title, order: index + 1 })
-          }),
-        )
+        await reorderCatalogModules(courseId, orderedModuleIds)
       }),
     reorderLessons: (
       _courseId: number,
       updates: Array<{ id: number; moduleId: number; order: number }>,
     ) =>
       execute(async () => {
-        const data = state.data
-        if (!data) return
-        await Promise.all(
-          updates.map((update) => {
-            const lesson = data.lessons.find((item) => item.id === update.id)
-            if (!lesson) return Promise.resolve()
-            return updateLesson(update.id, {
-              moduleId: update.moduleId,
-              title: lesson.title,
-              contentType: lesson.contentType,
-              contentUrl: lesson.contentUrl,
-              durationMinutes: lesson.durationMinutes,
-              order: update.order,
-            })
-          }),
-        )
+        await reorderCatalogLessons(_courseId, updates)
       }),
     createTrack: (payload: TrackPayload) => execute(() => createTrack(payload)),
     updateTrack: (trackId: number, payload: TrackPayload) => execute(() => updateTrack(trackId, payload)),

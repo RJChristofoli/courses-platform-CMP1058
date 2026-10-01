@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { dateInputToUtc } from '@/lib/utils'
 import type {
   AcademicCatalogData,
   CoursePayload,
@@ -165,8 +166,6 @@ export function StructureWorkspace({
         instructorId: course.instructorId,
         level: course.level,
         publishedAt: course.publishedAt,
-        totalLessons: course.totalLessons,
-        totalHours: course.totalHours,
       })
       setModuleForm(null)
       setLessonForm(null)
@@ -545,12 +544,11 @@ export function StructureWorkspace({
               </TwoCols>
               <TwoCols>
                 <SelectField label="Nível" value={courseForm.level} options={[{ value: 'Iniciante', label: 'Iniciante' }, { value: 'Intermediario', label: 'Intermediário' }, { value: 'Avancado', label: 'Avançado' }]} onChange={(value) => setCourseForm({ ...courseForm, level: value })} />
-                <Field label="Publicação"><Input type="date" value={courseForm.publishedAt.slice(0, 10)} onChange={(e) => setCourseForm({ ...courseForm, publishedAt: new Date(e.target.value).toISOString() })} /></Field>
+                <Field label="Publicação"><Input type="date" value={courseForm.publishedAt.slice(0, 10)} onChange={(e) => setCourseForm({ ...courseForm, publishedAt: dateInputToUtc(e.target.value) })} /></Field>
               </TwoCols>
-              <TwoCols>
-                <Field label="Total de aulas"><Input type="number" value={courseForm.totalLessons} onChange={(e) => setCourseForm({ ...courseForm, totalLessons: Number(e.target.value) })} /></Field>
-                <Field label="Total de horas"><Input type="number" value={courseForm.totalHours} onChange={(e) => setCourseForm({ ...courseForm, totalHours: Number(e.target.value) })} /></Field>
-              </TwoCols>
+              <p className="text-sm text-slate-500">
+                Totais calculados pelo conteúdo: {data.courses.find((course) => course.id === selection.id)?.totalLessons ?? 0} aulas e {data.courses.find((course) => course.id === selection.id)?.totalHours ?? 0} horas.
+              </p>
             </div>
           ) : null}
 

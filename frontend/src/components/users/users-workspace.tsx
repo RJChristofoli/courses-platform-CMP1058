@@ -16,13 +16,14 @@ import type {
   LessonProgressPayload,
   User,
   UserPayload,
+  UserUpdatePayload,
 } from '@/types/models'
 
 interface UsersWorkspaceProps {
   data: PlatformData
   isSaving: boolean
   createUser: (payload: UserPayload) => Promise<void>
-  updateUser: (userId: number, payload: UserPayload) => Promise<void>
+  updateUser: (userId: number, payload: UserUpdatePayload) => Promise<void>
   deleteUser: (userId: number) => Promise<void>
   createEnrollment: (payload: EnrollmentPayload) => Promise<void>
   updateEnrollment: (enrollmentId: number, payload: EnrollmentPayload) => Promise<void>
@@ -180,7 +181,7 @@ export function UsersWorkspace({
               return (
                 <tr key={user.id} className="border-b border-slate-100 last:border-none hover:bg-slate-50/60">
                   <td className="px-4 py-2.5 font-medium text-slate-900">{user.fullName}</td>
-                  <td className="px-4 py-2.5 text-slate-600">{user.role === 'student' ? 'Aluno' : 'Instrutor'}</td>
+                  <td className="px-4 py-2.5 text-slate-600">{{ admin: 'Administrador', student: 'Aluno', instructor: 'Instrutor' }[user.role]}</td>
                   <td className="px-4 py-2.5 text-slate-600">{user.email}</td>
                   <td className="px-4 py-2.5 text-center tabular-nums text-slate-600">{enrollmentsCount}</td>
                   <td className="px-4 py-2.5 text-slate-600">{plan?.name ?? 'Sem assinatura'}</td>
@@ -296,8 +297,8 @@ export function UsersWorkspace({
         isSaving={isSaving}
         onOpenChange={(open) => { setUserDialogOpen(open); if (!open) setEditingUser(null) }}
         onSubmit={async (payload) => {
-          if (editingUser) await updateUser(editingUser.id, payload)
-          else await createUser(payload)
+          if (editingUser) await updateUser(editingUser.id, payload as UserUpdatePayload)
+          else await createUser(payload as UserPayload)
           setUserDialogOpen(false)
           setEditingUser(null)
         }}

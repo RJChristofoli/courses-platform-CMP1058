@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { dateInputToUtc, normalizeMoneyInput } from '@/lib/utils'
 import type {
   PlatformData,
   Payment,
@@ -29,13 +30,13 @@ interface PlanDialogProps {
 }
 
 export function PlanDialog({ open, initialValue, isSaving, onOpenChange, onSubmit }: PlanDialogProps) {
-  const [form, setForm] = useState<PlanPayload>({ name: '', description: '', price: 0, durationMonths: 1 })
+  const [form, setForm] = useState<PlanPayload>({ name: '', description: '', price: '0.00', durationMonths: 1 })
 
   useEffect(() => {
     setForm({
       name: initialValue?.name ?? '',
       description: initialValue?.description ?? '',
-      price: initialValue?.price ?? 0,
+      price: initialValue?.price ?? '0.00',
       durationMonths: initialValue?.durationMonths ?? 1,
     })
   }, [initialValue, open])
@@ -47,7 +48,7 @@ export function PlanDialog({ open, initialValue, isSaving, onOpenChange, onSubmi
           <DialogTitle>{initialValue ? 'Editar plano' : 'Novo plano'}</DialogTitle>
           <DialogDescription>Configure os planos comerciais da plataforma.</DialogDescription>
         </DialogHeader>
-        <form className="mt-6 grid grid-cols-2 gap-4" onSubmit={(event) => { event.preventDefault(); void onSubmit(form) }}>
+        <form className="mt-6 grid grid-cols-2 gap-4" onSubmit={(event) => { event.preventDefault(); void onSubmit({ ...form, price: normalizeMoneyInput(form.price) }) }}>
           <label className="col-span-2 space-y-2 text-sm font-medium text-slate-700">
             <span>Nome</span>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
@@ -58,7 +59,7 @@ export function PlanDialog({ open, initialValue, isSaving, onOpenChange, onSubmi
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Preco</span>
-            <Input type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
+            <Input type="number" min="0" max="9999999999.99" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Duracao (meses)</span>
@@ -126,11 +127,11 @@ export function SubscriptionDialog({ open, initialValue, data, isSaving, onOpenC
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Inicio</span>
-            <Input type="date" value={form.startDate.slice(0, 10)} onChange={(e) => setForm({ ...form, startDate: new Date(e.target.value).toISOString() })} />
+          <Input type="date" value={form.startDate.slice(0, 10)} onChange={(e) => setForm({ ...form, startDate: dateInputToUtc(e.target.value) })} />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Fim</span>
-            <Input type="date" value={form.endDate.slice(0, 10)} onChange={(e) => setForm({ ...form, endDate: new Date(e.target.value).toISOString() })} />
+          <Input type="date" value={form.endDate.slice(0, 10)} onChange={(e) => setForm({ ...form, endDate: dateInputToUtc(e.target.value) })} />
           </label>
           <label className="col-span-2 space-y-2 text-sm font-medium text-slate-700">
             <span>Status</span>
@@ -163,7 +164,7 @@ interface PaymentDialogProps {
 export function PaymentDialog({ open, initialValue, data, isSaving, onOpenChange, onSubmit }: PaymentDialogProps) {
   const [form, setForm] = useState<PaymentPayload>({
     subscriptionId: 0,
-    amountPaid: 0,
+    amountPaid: '0.00',
     paymentDate: new Date().toISOString(),
     paymentMethod: 'Cartao',
     gatewayTransactionId: '',
@@ -172,7 +173,7 @@ export function PaymentDialog({ open, initialValue, data, isSaving, onOpenChange
   useEffect(() => {
     setForm({
       subscriptionId: initialValue?.subscriptionId ?? data.subscriptions[0]?.id ?? 0,
-      amountPaid: initialValue?.amountPaid ?? 0,
+      amountPaid: initialValue?.amountPaid ?? '0.00',
       paymentDate: initialValue?.paymentDate ?? new Date().toISOString(),
       paymentMethod: initialValue?.paymentMethod ?? 'Cartao',
       gatewayTransactionId: initialValue?.gatewayTransactionId ?? `TRX-${Date.now()}`,
@@ -186,7 +187,7 @@ export function PaymentDialog({ open, initialValue, data, isSaving, onOpenChange
           <DialogTitle>{initialValue ? 'Editar pagamento' : 'Novo pagamento'}</DialogTitle>
           <DialogDescription>Registre pagamentos vinculados a assinaturas e transacoes.</DialogDescription>
         </DialogHeader>
-        <form className="mt-6 grid grid-cols-2 gap-4" onSubmit={(event) => { event.preventDefault(); void onSubmit(form) }}>
+        <form className="mt-6 grid grid-cols-2 gap-4" onSubmit={(event) => { event.preventDefault(); void onSubmit({ ...form, amountPaid: normalizeMoneyInput(form.amountPaid) }) }}>
           <label className="col-span-2 space-y-2 text-sm font-medium text-slate-700">
             <span>Assinatura</span>
             <select className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm" value={form.subscriptionId} onChange={(e) => setForm({ ...form, subscriptionId: Number(e.target.value) })}>
@@ -199,7 +200,7 @@ export function PaymentDialog({ open, initialValue, data, isSaving, onOpenChange
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Valor pago</span>
-            <Input type="number" min="0" step="0.01" value={form.amountPaid} onChange={(e) => setForm({ ...form, amountPaid: Number(e.target.value) })} />
+            <Input type="number" min="0.01" max="9999999999.99" step="0.01" value={form.amountPaid} onChange={(e) => setForm({ ...form, amountPaid: e.target.value })} required />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Metodo</span>
@@ -211,7 +212,7 @@ export function PaymentDialog({ open, initialValue, data, isSaving, onOpenChange
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Data do pagamento</span>
-            <Input type="date" value={form.paymentDate.slice(0, 10)} onChange={(e) => setForm({ ...form, paymentDate: new Date(e.target.value).toISOString() })} />
+            <Input type="date" value={form.paymentDate.slice(0, 10)} onChange={(e) => setForm({ ...form, paymentDate: dateInputToUtc(e.target.value) })} />
           </label>
           <label className="space-y-2 text-sm font-medium text-slate-700">
             <span>Transacao</span>
