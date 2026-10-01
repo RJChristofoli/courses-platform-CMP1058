@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
-import { advisoryLock, recomputeCourseCompletion, withSerializableRetry } from '../../common/transactions'
+import { advisoryLock, lockCourseLearning, recomputeCourseCompletion, withSerializableRetry } from '../../common/transactions'
 import { httpError } from '../../common/http-error'
 
 @Injectable()
@@ -59,6 +59,7 @@ export class ModulesRepository {
       const existing = await transaction.module.findUnique({ where: { id } })
       if (!existing) throw httpError(404, 'NOT_FOUND', 'Módulo não encontrado')
       await advisoryLock(transaction, `modules-course-${existing.courseId}`)
+      await lockCourseLearning(transaction, existing.courseId)
       await transaction.module.delete({ where: { id } })
       const remaining = await transaction.module.findMany({ where: { courseId: existing.courseId }, orderBy: [{ order: 'asc' }, { id: 'asc' }] })
       await Promise.all(remaining.map((module, index) =>

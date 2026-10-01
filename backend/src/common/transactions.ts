@@ -24,6 +24,10 @@ export async function advisoryLock(transaction: TransactionClient, key: string) 
   await transaction.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`
 }
 
+export function lockCourseLearning(transaction: TransactionClient, courseId: number) {
+  return advisoryLock(transaction, `course-learning-${courseId}`)
+}
+
 export async function renumberTrackCourses(transaction: TransactionClient, trackId: number) {
   const relations = await transaction.trackCourse.findMany({ where: { trackId }, orderBy: [{ order: 'asc' }, { id: 'asc' }] })
   await Promise.all(relations.map((relation, index) =>

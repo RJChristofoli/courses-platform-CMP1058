@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { AuthenticatedUser } from '../../common/authenticated-user'
-import { advisoryLock, renumberTrackCourses, withSerializableRetry } from '../../common/transactions'
+import { advisoryLock, lockCourseLearning, renumberTrackCourses, withSerializableRetry } from '../../common/transactions'
 import { PrismaService } from '../../prisma/prisma.service'
 
 export interface CourseInput {
@@ -58,6 +58,7 @@ export class CoursesRepository {
 
   remove(id: number) {
     return withSerializableRetry(this.prisma, async (transaction) => {
+      await lockCourseLearning(transaction, id)
       const links = await transaction.trackCourse.findMany({ where: { courseId: id }, select: { trackId: true } })
       const trackIds = [...new Set(links.map((link) => link.trackId))].sort((a, b) => a - b)
       for (const trackId of trackIds) await advisoryLock(transaction, `track-courses-${trackId}`)

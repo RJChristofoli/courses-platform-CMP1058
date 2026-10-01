@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.service'
-import { advisoryLock, recomputeCourseCompletion, withSerializableRetry } from '../../common/transactions'
+import { advisoryLock, lockCourseLearning, recomputeCourseCompletion, withSerializableRetry } from '../../common/transactions'
 import { httpError } from '../../common/http-error'
 import { LessonOrderItemDto } from './dto/lesson.dto'
 
@@ -34,6 +34,7 @@ export class LessonsRepository {
       const module = await transaction.module.findUnique({ where: { id: input.moduleId } })
       if (!module) throw httpError(404, 'NOT_FOUND', 'Módulo não encontrado')
       await advisoryLock(transaction, `lessons-course-${module.courseId}`)
+      await lockCourseLearning(transaction, module.courseId)
       const target = await transaction.module.findUnique({ where: { id: input.moduleId } })
       if (!target) throw httpError(404, 'NOT_FOUND', 'Módulo não encontrado')
       const lessons = await transaction.lesson.findMany({ where: { moduleId: target.id }, orderBy: [{ order: 'asc' }, { id: 'asc' }] })
@@ -57,6 +58,7 @@ export class LessonsRepository {
         throw httpError(409, 'LESSON_COURSE_CHANGE_FORBIDDEN', 'A aula não pode mudar de curso')
       }
       await advisoryLock(transaction, `lessons-course-${current.module.courseId}`)
+      await lockCourseLearning(transaction, current.module.courseId)
 
       const sourceLessons = await transaction.lesson.findMany({ where: { moduleId: current.moduleId }, orderBy: [{ order: 'asc' }, { id: 'asc' }] })
       const targetLessons = current.moduleId === destination.id

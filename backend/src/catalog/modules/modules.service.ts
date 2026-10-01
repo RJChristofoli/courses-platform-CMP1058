@@ -28,7 +28,6 @@ export class ModulesService {
   }
 
   async update(id: number, input: UpdateModuleDto) {
-    await this.assertCourse(input.courseId)
     return this.modules.update(id, input)
   }
 
