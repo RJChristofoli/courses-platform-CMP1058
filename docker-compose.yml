@@ -34,6 +34,20 @@ services:
     ports:
       - "3001:3001"
 
+  prisma-studio:
+    build:
+      context: ./backend
+    command: ["npm", "run", "db:studio", "--", "--hostname", "0.0.0.0", "--port", "5555", "--browser", "none"]
+    environment:
+      DATABASE_URL: postgresql://courses:${POSTGRES_PASSWORD:-courses_dev_only}@postgres:5432/courses_platform?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    ports:
+      - "127.0.0.1:5555:5555"
+
   frontend:
     build:
       context: ./frontend

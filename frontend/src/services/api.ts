@@ -213,6 +213,10 @@ export function createUser(payload: UserPayload) {
   return request<User>('users', { method: 'POST', body: JSON.stringify(payload) })
 }
 
+export function registerUser(payload: Omit<UserPayload, 'role'>) {
+  return request<User>('auth/register', { method: 'POST', body: JSON.stringify(payload) })
+}
+
 export function updateUser(userId: number, payload: UserUpdatePayload) {
   return request<User>(`users/${userId}`, { method: 'PUT', body: JSON.stringify(payload) })
 }

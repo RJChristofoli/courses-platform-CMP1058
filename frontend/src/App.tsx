@@ -9,6 +9,7 @@ import { FinancePage } from '@/pages/finance-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 import { UsersPage } from '@/pages/users-page'
 import { LoginPage } from '@/pages/login-page'
+import { RegisterPage } from '@/pages/register-page'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 
@@ -35,6 +36,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/cadastro" element={<RegisterPage />} />
       <Route element={<AdminRoute />}>
         <Route element={<AppLayout />}>
           <Route index element={<Navigate replace to="/catalogo/curso" />} />

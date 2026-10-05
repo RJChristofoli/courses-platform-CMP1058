@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { PrismaService } from '../src/prisma/prisma.service'
 import { configureApp } from '../src/config/configure-app'
-import { hash } from 'bcryptjs'
+import { compare, hash } from 'bcryptjs'
 import * as request from 'supertest'
 import { execFileSync } from 'node:child_process'
 
@@ -86,6 +86,8 @@ describe('API E2E', () => {
     const docs = await api.get('/docs-json').expect(200)
     const openapi = docs.body
     expect(openapi.paths['/auth/login']).toBeDefined()
+    expect(openapi.paths['/auth/register'].post.security).toBeUndefined()
+    expect(openapi.components.schemas.RegisterDto.properties.role).toBeUndefined()
     expect(openapi.components.securitySchemes.bearer).toBeDefined()
     expect(openapi.tags.map((tag: { name: string }) => tag.name)).toEqual(expect.arrayContaining([
       'Auth', 'Users', 'Categories', 'Courses', 'Modules', 'Lessons', 'Tracks', 'TrackCourses',
@@ -142,6 +144,36 @@ describe('API E2E', () => {
     await api.post('/auth/login').send({ email: createdUser.body.email, password }).expect(401)
     await api.post('/auth/login').send({ email: createdUser.body.email, password: 'ChangedPassword123!' }).expect(200)
     await api.get('/courses').set(as(adminToken)).query({ unexpected: '1' }).expect(400)
+  })
+
+  it('registers students publicly, hashes passwords and rejects invalid or privileged signups', async () => {
+    const api = request(app.getHttpServer())
+    const input = { fullName: '  Nova Aluna  ', email: '  Signup@TEST.local  ', password }
+    const created = await api.post('/auth/register').send(input).expect(201)
+    expect(created.body).toMatchObject({ fullName: 'Nova Aluna', email: 'signup@test.local', role: 'student' })
+    expect(created.body.password).toBeUndefined()
+    expect(created.body.passwordHash).toBeUndefined()
+    const stored = await prisma.user.findUniqueOrThrow({ where: { id: created.body.id } })
+    expect(stored.passwordHash).not.toBe(password)
+    expect(await compare(password, stored.passwordHash)).toBe(true)
+    const login = await api.post('/auth/login').send({ email: created.body.email, password }).expect(200)
+    await api.get('/auth/me').set(as(login.body.accessToken)).expect(200)
+    await api.get('/users').set(as(login.body.accessToken)).expect(403)
+    await api.post('/auth/register').send(input).expect(409)
+      .expect(({ body }) => expect(body.code).toBe('EMAIL_ALREADY_EXISTS'))
+    const invalidInputs = [
+      { ...input, fullName: '   ' },
+      { ...input, email: 'invalid' },
+      { ...input, password: 'short' },
+      { ...input, password: 'é'.repeat(37) },
+      { ...input, role: 'admin' },
+      { ...input, role: 'instructor' },
+      { ...input, passwordHash: 'injected' },
+    ]
+    for (const invalid of invalidInputs) {
+      await api.post('/auth/register').send(invalid).expect(400)
+    }
+    expect(await prisma.user.count({ where: { email: created.body.email } })).toBe(1)
   })
 
   it('creates catalog data, calculates course totals and applies ordering atomically', async () => {

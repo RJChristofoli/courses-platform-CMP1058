@@ -6,13 +6,25 @@ import { httpError } from '../common/http-error'
 import { AuthenticatedUser } from '../common/authenticated-user'
 import { durationInSeconds } from '../common/duration'
 import { LoginDto } from './dto/login.dto'
+import { RegisterDto } from './dto/register.dto'
+import { UsersService } from '../users/users.service'
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly users: UsersRepository,
     private readonly jwt: JwtService,
+    private readonly usersService: UsersService,
   ) {}
+
+  register(input: RegisterDto) {
+    return this.usersService.create({
+      fullName: input.fullName,
+      email: input.email,
+      password: input.password,
+      role: 'student',
+    })
+  }
 
   async login(input: LoginDto) {
     const user = await this.users.findCredentialsByEmail(input.email.trim().toLowerCase())

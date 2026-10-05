@@ -20,6 +20,10 @@ docker compose exec backend npm run db:seed
 
 O `.env` é opcional para a demonstração local; sem ele, Compose usa os mesmos valores de exemplo.
 
+O Prisma Studio sobe junto pelo Compose em `http://localhost:5555`, conectado ao banco da aplicação. Abra um modelo (por exemplo, `User`) para consultar seus registros. Para iniciá-lo separadamente, use `docker compose up -d prisma-studio`.
+
+Na tela de login, use **Criar conta** para cadastrar nome, email e senha. O cadastro público cria um aluno e retorna ao login com confirmação e email preenchido. Perfis de administrador e instrutor continuam sendo gerenciados por administradores. A tela também possui um link para o Swagger em `/api/docs/`, acessível pelo proxy tanto no Compose quanto no Vite.
+
 Endereços: interface em `http://localhost:4173`, API em `http://localhost:3001`, Swagger em `http://localhost:3001/docs` e OpenAPI JSON em `http://localhost:3001/docs-json`. A interface encaminha `/api` ao backend. O container aplica migrations ao iniciar; o seed é um comando separado e repetível.
 
 Contas de demonstração:
